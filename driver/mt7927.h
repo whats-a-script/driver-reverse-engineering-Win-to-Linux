@@ -66,31 +66,31 @@ struct mt7927_queue {
 struct mt7927_dev {
 	struct pci_dev *pdev;			/* PCI device */
 	struct device *dev;			/* Generic device */
-	
+
 	/* Memory-mapped I/O */
 	void __iomem *regs;			/* Register base address */
-	
+
 	/* MAC80211 integration */
 	struct ieee80211_hw *hw;		/* mac80211 hardware */
-	
+
 	/* TX/RX queues */
 	struct mt7927_queue tx_q[MT7927_MAX_TX_RINGS];
 	struct mt7927_queue rx_q[MT7927_MAX_RX_RINGS];
-	
+
 	/* Interrupts */
 	int irq;				/* IRQ number */
 	u32 irq_mask;				/* Current interrupt mask */
-	
+
 	/* Workqueue for deferred processing */
 	struct workqueue_struct *wq;
-	
+
 	/* Device state */
 	bool initialized;			/* Driver initialized */
 	bool fw_loaded;				/* Firmware loaded */
-	
+
 	/* Firmware information */
 	const struct firmware *fw;		/* Firmware blob */
-	
+
 	/* Statistics */
 	u64 tx_packets;
 	u64 rx_packets;
