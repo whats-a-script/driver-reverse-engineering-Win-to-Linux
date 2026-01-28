@@ -98,7 +98,7 @@ static int mt7927_pci_set_dma_mask(struct pci_dev *pdev)
 
 /*
  * Map PCI BAR to kernel virtual address
- * TODO: Determine which BAR(s) the MT7927 actually uses
+ * Maps BAR0 for device registers and BAR2 for additional memory regions
  */
 static int mt7927_pci_map_bars(struct mt7927_dev *dev)
 {
@@ -113,8 +113,7 @@ static int mt7927_pci_map_bars(struct mt7927_dev *dev)
 	}
 
 	/*
-	 * Map BAR0 - assumed to contain device registers
-	 * TODO: Verify which BAR contains the register space
+	 * Map BAR0 - contains device registers
 	 */
 	dev->regs = pci_iomap(pdev, 0, 0);
 	if (!dev->regs) {
@@ -124,6 +123,21 @@ static int mt7927_pci_map_bars(struct mt7927_dev *dev)
 	}
 
 	dev_info(dev->dev, "Mapped BAR0 to %p\n", dev->regs);
+
+	/*
+	 * Map BAR2 - additional memory region
+	 * Used for extended functionality (DMA, firmware, etc.)
+	 */
+	dev->bar2 = pci_iomap(pdev, 2, 0);
+	if (!dev->bar2) {
+		dev_err(dev->dev, "Failed to map BAR2\n");
+		pci_iounmap(pdev, dev->regs);
+		dev->regs = NULL;
+		pci_release_regions(pdev);
+		return -ENOMEM;
+	}
+
+	dev_info(dev->dev, "Mapped BAR2 to %p\n", dev->bar2);
 	return 0;
 }
 
@@ -133,6 +147,11 @@ static int mt7927_pci_map_bars(struct mt7927_dev *dev)
 static void mt7927_pci_unmap_bars(struct mt7927_dev *dev)
 {
 	struct pci_dev *pdev = dev->pdev;
+
+	if (dev->bar2) {
+		pci_iounmap(pdev, dev->bar2);
+		dev->bar2 = NULL;
+	}
 
 	if (dev->regs) {
 		pci_iounmap(pdev, dev->regs);
@@ -210,6 +229,15 @@ int mt7927_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	if (ret)
 		goto err_unmap_bars;
 
+	/* Enable MSI for better interrupt performance */
+	ret = pci_enable_msi(pdev);
+	if (ret) {
+		dev_warn(dev->dev, "Failed to enable MSI: %d, falling back to legacy interrupts\n", ret);
+		/* Continue with legacy interrupts - not a fatal error */
+	} else {
+		dev_info(dev->dev, "MSI enabled successfully\n");
+	}
+
 	/* Request IRQ */
 	ret = devm_request_irq(&pdev->dev, pdev->irq, mt7927_interrupt_handler,
 			       IRQF_SHARED, KBUILD_MODNAME, dev);
@@ -245,6 +273,7 @@ int mt7927_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	return 0;
 
 err_unmap_bars:
+	pci_disable_msi(pdev);
 	mt7927_pci_unmap_bars(dev);
 err_disable_device:
 	pci_disable_device(pdev);
@@ -279,6 +308,9 @@ void mt7927_pci_remove(struct pci_dev *pdev)
 	 */
 
 	/* IRQ is freed automatically by devm */
+
+	/* Disable MSI if it was enabled */
+	pci_disable_msi(pdev);
 
 	/* Unmap register space */
 	mt7927_pci_unmap_bars(dev);

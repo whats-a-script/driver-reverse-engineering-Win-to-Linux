@@ -68,7 +68,8 @@ struct mt7927_dev {
 	struct device *dev;			/* Generic device */
 
 	/* Memory-mapped I/O */
-	void __iomem *regs;			/* Register base address */
+	void __iomem *regs;			/* Register base address (BAR0) */
+	void __iomem *bar2;			/* BAR2 memory region */
 
 	/* MAC80211 integration */
 	struct ieee80211_hw *hw;		/* mac80211 hardware */
