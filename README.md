@@ -14,7 +14,29 @@
 
 ---
 
-A comprehensive, staged engineering program for converting Windows device drivers into Linux/Unix driver packages for PCIe, USB, and add-in/on-board peripherals.
+A comprehensive, staged engineering program for repairing and adapting device drivers to work with non-Windows operating systems (Linux/Unix) for PCIe, USB, and add-in/on-board peripherals.
+
+> **⚠️ IMPORTANT LEGAL DISCLAIMERS:**
+>
+> **Third-Party Intellectual Property:**
+> - The project and its maintainers DO NOT CLAIM OWNERSHIP OF, OR RIGHTS TO, ANY THIRD-PARTY DRIVER.
+> - All third-party drivers and firmware are the intellectual property of their respective manufacturers.
+>
+> **No Warranty:**
+> - The software is provided "AS IS," without warranty of any kind, express or implied.
+>
+> **Limitation of Liability:**
+> - The project, its contributors, maintainers, and affiliates SHALL NOT BE LIABLE for any damages, losses, or claims (including third-party claims) resulting from the use, modification, or redistribution of third-party drivers.
+> - Users are solely responsible for obtaining any rights, licenses, or permissions required to use, modify, or redistribute third-party drivers.
+>
+> **Indemnity:**
+> - Users agree to indemnify and hold harmless the project and its maintainers from claims arising from their use or distribution of third-party drivers.
+>
+> **Purpose:**
+> - This software is intended solely for repairing drivers to work with the subject's operating system (not Windows/Microsoft).
+>
+> **Release Gate:**
+> - Any decision to include or redistribute third-party binaries in a public release requires documented legal signoff and must pass the Release Gate checklist.
 
 ## 🎯 Project Vision
 
@@ -238,6 +260,7 @@ make
 - [Architecture Details](docs/ARCHITECTURE.md)
 - [Security Guidelines](docs/SECURITY.md)
 - [Legal Compliance](docs/LEGAL-COMPLIANCE.md)
+- [Release Gate Checklist](docs/RELEASE-GATE-CHECKLIST.md) - **Required for third-party binary releases**
 - [Contributing Guide](docs/CONTRIBUTING.md)
 
 ## 🔬 Initial Test Case: MediaTek MT7927
@@ -312,9 +335,15 @@ This software is proprietary and confidential.
 
 **⚠️ ACCESS REQUIRES SIGNED NDA:** All users must sign a Non-Disclosure Agreement before accessing or using this software. See [NDA.md](NDA.md) for the complete agreement.
 
-Unauthorized copying, distribution, modification, or use is strictly prohibited without express written permission and a signed NDA. See [LICENSE](LICENSE) for complete terms.
+**⚠️ COMPREHENSIVE LEGAL DISCLAIMERS:** This project does not claim ownership of any third-party drivers. Users are solely responsible for compliance with third-party IP rights and accept all liability. See [LICENSE](LICENSE) for complete terms including:
+- No warranty (provided "as is")
+- Limitation of liability for damages/losses/claims
+- User indemnity obligations
+- Release gate requirements for third-party binaries
 
-**Note:** Users must obtain permission and sign the NDA before using this software. Linux kernel modules may be subject to separate licensing requirements (GPLv2) for kernel compatibility.
+Unauthorized copying, distribution, modification, or use is strictly prohibited without express written permission and a signed NDA.
+
+**Note:** This software is intended solely for repairing drivers to work with non-Windows operating systems. Linux kernel modules may be subject to GPLv2 for kernel compatibility.
 
 ## 🙏 Acknowledgments
 
