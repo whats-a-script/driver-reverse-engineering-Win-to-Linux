@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/whats-a-script/TP-link-wifi-MT7927-reverse-engineer/schemas/analyzer-output-v1.json",
+  "title": "Driver Analyzer Output Schema",
+  "description": "Structured output from Windows driver binary analysis",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "analysis_metadata",
+    "driver_info",
+    "driver_classification",
+    "conversion_strategies"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "analysis_metadata": {
+      "type": "object",
+      "required": ["timestamp", "analyzer_version", "source_file"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "analyzer_version": { "type": "string" },
+        "source_file": { "type": "string" },
+        "analysis_duration_seconds": { "type": "number" },
+        "tools_used": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "driver_info": {
+      "type": "object",
+      "required": ["file_name", "file_size", "file_hash"]
+    },
+    "driver_classification": {
+      "type": "object",
+      "required": ["driver_model", "driver_type", "confidence"]
+    },
+    "conversion_strategies": {
+      "type": "object",
+      "required": ["recommended_strategy", "strategies"]
+    }
+  }
+}
