@@ -1,0 +1,20 @@
+config MT7927
+	tristate "MediaTek MT7927 (Filogic 380) Wi-Fi 7 PCIe support"
+	depends on PCI && MAC80211
+	help
+	  This is an experimental, reverse-engineered driver for the
+	  MediaTek MT7927 (Filogic 380) Wi-Fi 7 PCIe chipset.
+	  
+	  PCI ID: 14C3:7927
+	  
+	  This driver is NOT official and is based on reverse engineering
+	  efforts. Use at your own risk. It may not work correctly and
+	  could potentially damage hardware.
+	  
+	  The driver is modeled after the mt76 driver family but is
+	  independent and experimental.
+	  
+	  To compile this driver as a module, choose M here. The module
+	  will be called mt7927.
+	  
+	  If unsure, say N.
