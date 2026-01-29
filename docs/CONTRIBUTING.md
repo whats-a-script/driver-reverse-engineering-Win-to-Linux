@@ -1,5 +1,17 @@
 # Contributing to Driver Conversion Framework
 
+> **⚠️ IMPORTANT: NDA REQUIREMENT**
+>
+> Before contributing to this project, you must:
+> 1. Sign the Non-Disclosure Agreement (see [NDA.md](../NDA.md))
+> 2. Obtain written authorization from project maintainers
+> 3. Understand that all contributions become proprietary property
+> 4. Agree to maintain strict confidentiality
+>
+> **All contributions are subject to All Rights Reserved licensing.**
+
+---
+
 Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
 
 ## 🤝 Ways to Contribute
@@ -252,7 +264,11 @@ Contributors will be:
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License (for framework) and GPLv2 (for kernel modules).
+By contributing, you agree that:
+1. Your contributions will become proprietary property with All Rights Reserved
+2. You have signed the required Non-Disclosure Agreement (NDA)
+3. Kernel modules may be subject to GPLv2 for Linux kernel compatibility
+4. All contributions are confidential and may not be shared without permission
 
 ---
 

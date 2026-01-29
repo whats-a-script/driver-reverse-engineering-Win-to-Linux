@@ -34,7 +34,8 @@
 - ✅ Makefile for kernel module builds
 
 ### Infrastructure (80%)
-- ✅ LICENSE (MIT for framework)
+- ✅ LICENSE (All Rights Reserved, proprietary)
+- ✅ NDA.md (Non-Disclosure Agreement)
 - ✅ .gitignore
 - ✅ requirements.txt (Python dependencies)
 - ✅ CI/CD pipeline (GitHub Actions)

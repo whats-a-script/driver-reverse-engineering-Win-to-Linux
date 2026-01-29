@@ -323,7 +323,9 @@ This document summarizes all deliverables created for the Windows to Linux Drive
    - Test outputs
    - Generated files
 
-4. `LICENSE` (MIT with kernel module note)
+4. `LICENSE` (All Rights Reserved with NDA requirement)
+
+5. `NDA.md` (Non-Disclosure Agreement for access control)
 
 ---
 

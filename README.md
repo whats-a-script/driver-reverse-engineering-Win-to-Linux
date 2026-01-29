@@ -1,5 +1,19 @@
 # Windows to Linux Driver Conversion Framework
 
+> **⚠️ CONFIDENTIAL & PROPRIETARY - NDA REQUIRED**
+> 
+> This repository contains confidential and proprietary information.
+> 
+> **By accessing this repository, you acknowledge that:**
+> - You must sign a Non-Disclosure Agreement (see [NDA.md](NDA.md))
+> - All information is confidential and may not be shared
+> - Unauthorized access or use is prohibited
+> - All Rights Reserved - No permissions granted without signed NDA
+>
+> **For authorized access, contact the project maintainers.**
+
+---
+
 A comprehensive, staged engineering program for converting Windows device drivers into Linux/Unix driver packages for PCIe, USB, and add-in/on-board peripherals.
 
 ## 🎯 Project Vision
@@ -292,9 +306,15 @@ We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for
 
 ## 📄 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+Copyright (c) 2026 TP-link-wifi-MT7927-reverse-engineer Contributors. All Rights Reserved.
 
-**Note:** This framework is a tool for driver development. Users are responsible for ensuring compliance with all applicable licenses, EULAs, and regulations when using it with third-party drivers.
+This software is proprietary and confidential. 
+
+**⚠️ ACCESS REQUIRES SIGNED NDA:** All users must sign a Non-Disclosure Agreement before accessing or using this software. See [NDA.md](NDA.md) for the complete agreement.
+
+Unauthorized copying, distribution, modification, or use is strictly prohibited without express written permission and a signed NDA. See [LICENSE](LICENSE) for complete terms.
+
+**Note:** Users must obtain permission and sign the NDA before using this software. Linux kernel modules may be subject to separate licensing requirements (GPLv2) for kernel compatibility.
 
 ## 🙏 Acknowledgments
 
