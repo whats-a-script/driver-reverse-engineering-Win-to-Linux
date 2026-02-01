@@ -41,9 +41,8 @@ Thumbs.db
 
 # Data files (except placeholders and examples)
 # Allow README files in raw data directories
-data/raw/*/
-!data/raw/**/README.md
-!data/raw/.gitkeep
+data/raw/*/*
+!data/raw/*/README.md
 
 # Large binary files (keep repository lean)
 *.sys
