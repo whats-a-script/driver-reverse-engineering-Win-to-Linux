@@ -177,7 +177,7 @@ def create_diff_report(device_id: str, windows_data: Dict, linux_data: Dict) -> 
         "function_analysis": func_comparison,
         "commonalities": {
             "register_overlap": [
-                f"Found {reg_comparison['common_registers']} common registers"
+                f"Found {reg_comparison['common_registers']} common {'register' if reg_comparison['common_registers'] == 1 else 'registers'}"
             ],
             "shared_commands": [
                 "Analysis required - placeholder"

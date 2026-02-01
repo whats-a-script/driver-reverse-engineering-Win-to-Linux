@@ -28,7 +28,7 @@
   },
   "commonalities": {
     "register_overlap": [
-      "Found 1 common registers"
+      "Found 1 common register"
     ],
     "shared_commands": [
       "Analysis required - placeholder"
