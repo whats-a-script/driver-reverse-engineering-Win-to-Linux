@@ -97,7 +97,7 @@ def create_placeholder_canonical(device_id: str, platform: str) -> dict:
             "chipset": "MT7927",
             "source_url": None,  # Do not invent URLs
             "collection_date": datetime.now().strftime("%Y-%m-%d"),
-            "notes": "SYNTHETIC - Placeholder data created by scaffolding script"
+            "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
         },
         "windows_nav_card": {
             "driver_download_url": None,  # Do not invent URLs
