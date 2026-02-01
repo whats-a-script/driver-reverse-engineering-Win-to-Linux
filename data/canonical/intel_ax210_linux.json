@@ -1,0 +1,34 @@
+{
+  "device_id": "intel_ax210",
+  "device_name": "Intel Ax210 (Placeholder)",
+  "platform": "linux",
+  "metadata": {
+    "driver_version": "0.0.0.SYNTHETIC",
+    "driver_date": "2026-02-01",
+    "vendor": "Unknown",
+    "chipset": "MT7927",
+    "source_url": null,
+    "collection_date": "2026-02-01",
+    "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
+  },
+  "windows_nav_card": null,
+  "driver_components": {
+    "modules": [],
+    "config_files": []
+  },
+  "register_map": [
+    {
+      "address": "0x0000",
+      "name": "PLACEHOLDER_REG",
+      "description": "Placeholder register for scaffolding",
+      "access": "rw"
+    }
+  ],
+  "functions": [
+    {
+      "name": "placeholder_function",
+      "signature": "void placeholder_function(void)",
+      "purpose": "Placeholder function for scaffolding"
+    }
+  ]
+}

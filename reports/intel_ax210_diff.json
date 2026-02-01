@@ -1,0 +1,59 @@
+{
+  "device_id": "intel_ax210",
+  "comparison": "windows_vs_linux",
+  "generated_date": "2026-02-01",
+  "source_files": {
+    "windows_canonical": "data/canonical/intel_ax210_windows.json",
+    "linux_canonical": "data/canonical/intel_ax210_linux.json"
+  },
+  "metadata_comparison": {
+    "windows_version": "0.0.0.SYNTHETIC",
+    "linux_version": "0.0.0.SYNTHETIC",
+    "windows_date": "2026-02-01",
+    "linux_date": "2026-02-01"
+  },
+  "register_analysis": {
+    "total_windows_registers": 1,
+    "total_linux_registers": 1,
+    "common_registers": 1,
+    "windows_only_registers": 0,
+    "linux_only_registers": 0,
+    "overlap_percentage": 100.0
+  },
+  "function_analysis": {
+    "total_windows_functions": 1,
+    "total_linux_functions": 1,
+    "common_function_names": 1,
+    "overlap_percentage": 100.0
+  },
+  "commonalities": {
+    "register_overlap": [
+      "Found 1 common register"
+    ],
+    "shared_commands": [
+      "Analysis required - placeholder"
+    ]
+  },
+  "differences": {
+    "windows_only": [
+      "0 Windows-specific registers",
+      "1 Windows functions"
+    ],
+    "linux_only": [
+      "0 Linux-specific registers",
+      "1 Linux functions"
+    ]
+  },
+  "insights": [
+    {
+      "category": "register_overlap",
+      "finding": "High register overlap (100.0%) suggests common hardware interface",
+      "confidence": "high"
+    },
+    {
+      "category": "data_quality",
+      "finding": "Diff includes SYNTHETIC placeholder data; insights may not be meaningful",
+      "confidence": "high"
+    }
+  ]
+}

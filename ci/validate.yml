@@ -1,0 +1,294 @@
+name: MT7927 Driver Analysis Pipeline Validation
+
+on:
+  push:
+    branches: [ main, agent-bootstrap, 'copilot/**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate Repository Structure and Data
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          pip install jsonschema
+      
+      - name: Validate directory structure
+        run: |
+          echo "Checking required directories..."
+          for dir in drivers scripts tools data/raw/windows data/raw/linux data/canonical reports ci; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ Missing directory: $dir"
+              exit 1
+            fi
+            echo "✓ Found: $dir"
+          done
+          echo "✓ All required directories exist"
+      
+      - name: Validate WiFi inventory CSV
+        run: |
+          echo "Validating drivers/wifi_inventory.csv..."
+          
+          if [ ! -f "drivers/wifi_inventory.csv" ]; then
+            echo "❌ Missing file: drivers/wifi_inventory.csv"
+            exit 1
+          fi
+          
+          # Check header
+          HEADER=$(head -n 1 drivers/wifi_inventory.csv)
+          EXPECTED="device_id,device_name,chipset,vendor,windows_collected,linux_collected,normalized,diffed,notes"
+          
+          if [ "$HEADER" != "$EXPECTED" ]; then
+            echo "❌ Invalid CSV header"
+            echo "Expected: $EXPECTED"
+            echo "Got:      $HEADER"
+            exit 1
+          fi
+          
+          echo "✓ CSV header is valid"
+          
+          # Check for duplicates
+          if [ $(tail -n +2 drivers/wifi_inventory.csv | cut -d',' -f1 | sort | uniq -d | wc -l) -gt 0 ]; then
+            echo "❌ Duplicate device_ids found in CSV"
+            exit 1
+          fi
+          
+          echo "✓ No duplicate device_ids"
+          echo "✓ WiFi inventory CSV is valid"
+      
+      - name: Validate canonical JSON schema
+        run: |
+          echo "Validating canonical JSON files..."
+          
+          # Create a simple Python validator
+          cat > validate_canonical.py << 'EOF'
+          import json
+          import sys
+          from pathlib import Path
+          
+          required_fields = [
+              "device_id", "device_name", "platform", "metadata",
+              "driver_components", "register_map", "functions"
+          ]
+          
+          required_metadata = [
+              "driver_version", "driver_date", "vendor", "chipset",
+              "source_url", "collection_date", "notes"
+          ]
+          
+          errors = []
+          
+          for json_file in Path("data/canonical").glob("*.json"):
+              print(f"Checking {json_file}...")
+              
+              try:
+                  with open(json_file) as f:
+                      data = json.load(f)
+                  
+                  # Check required top-level fields
+                  for field in required_fields:
+                      if field not in data:
+                          errors.append(f"{json_file}: Missing required field '{field}'")
+                  
+                  # Check metadata fields
+                  if "metadata" in data:
+                      for field in required_metadata:
+                          if field not in data["metadata"]:
+                              errors.append(f"{json_file}: Missing metadata field '{field}'")
+                  
+                  # Check platform value
+                  if "platform" in data and data["platform"] not in ["windows", "linux"]:
+                      errors.append(f"{json_file}: Invalid platform '{data['platform']}'")
+                  
+                  # Validate no invented URLs
+                  if "metadata" in data and data["metadata"].get("source_url"):
+                      url = data["metadata"]["source_url"]
+                      if "example.com" in url or "placeholder" in url.lower():
+                          errors.append(f"{json_file}: Invented URL detected: {url}")
+                  
+                  print(f"  ✓ {json_file.name} is valid")
+              
+              except json.JSONDecodeError as e:
+                  errors.append(f"{json_file}: Invalid JSON - {e}")
+              except Exception as e:
+                  errors.append(f"{json_file}: Validation error - {e}")
+          
+          if errors:
+              print("\n❌ Validation errors found:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+          else:
+              print("\n✓ All canonical JSON files are valid")
+          EOF
+          
+          python validate_canonical.py
+      
+      - name: Validate diff reports
+        run: |
+          echo "Validating diff report JSON files..."
+          
+          cat > validate_diffs.py << 'EOF'
+          import json
+          import sys
+          from pathlib import Path
+          
+          required_fields = [
+              "device_id", "comparison", "generated_date",
+              "commonalities", "differences", "insights"
+          ]
+          
+          errors = []
+          
+          for json_file in Path("reports").glob("*_diff.json"):
+              print(f"Checking {json_file}...")
+              
+              try:
+                  with open(json_file) as f:
+                      data = json.load(f)
+                  
+                  for field in required_fields:
+                      if field not in data:
+                          errors.append(f"{json_file}: Missing required field '{field}'")
+                  
+                  if "comparison" in data and data["comparison"] != "windows_vs_linux":
+                      errors.append(f"{json_file}: Invalid comparison type '{data['comparison']}'")
+                  
+                  print(f"  ✓ {json_file.name} is valid")
+              
+              except json.JSONDecodeError as e:
+                  errors.append(f"{json_file}: Invalid JSON - {e}")
+              except Exception as e:
+                  errors.append(f"{json_file}: Validation error - {e}")
+          
+          if errors:
+              print("\n❌ Validation errors found:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+          else:
+              print("\n✓ All diff reports are valid")
+          EOF
+          
+          python validate_diffs.py
+      
+      - name: Validate synthetic data documentation
+        run: |
+          echo "Checking synthetic data documentation..."
+          
+          # Check if secondary_check.md exists
+          if [ ! -f "reports/secondary_check.md" ]; then
+            echo "⚠️  Warning: reports/secondary_check.md not found"
+            echo "   This file should document all synthetic data"
+            # Don't fail, just warn
+          else
+            echo "✓ Found reports/secondary_check.md"
+          fi
+          
+          # Check canonical JSONs for SYNTHETIC markers
+          cat > check_synthetic.py << 'EOF'
+          import json
+          from pathlib import Path
+          
+          synthetic_devices = []
+          
+          for json_file in Path("data/canonical").glob("*.json"):
+              with open(json_file) as f:
+                  data = json.load(f)
+              
+              notes = data.get("metadata", {}).get("notes", "")
+              if "SYNTHETIC" in notes:
+                  synthetic_devices.append(json_file.name)
+                  print(f"  Found SYNTHETIC marker in {json_file.name}")
+          
+          if synthetic_devices:
+              print(f"\n✓ {len(synthetic_devices)} file(s) with synthetic data are properly marked")
+          else:
+              print("\n✓ No synthetic data markers found")
+          EOF
+          
+          python check_synthetic.py
+      
+      - name: Validate cross-references
+        run: |
+          echo "Validating cross-references between files..."
+          
+          cat > validate_refs.py << 'EOF'
+          import csv
+          import sys
+          from pathlib import Path
+          
+          errors = []
+          
+          # Load device IDs from CSV
+          csv_devices = set()
+          with open("drivers/wifi_inventory.csv") as f:
+              reader = csv.DictReader(f)
+              for row in reader:
+                  csv_devices.add(row["device_id"])
+          
+          print(f"Found {len(csv_devices)} devices in CSV: {csv_devices}")
+          
+          # Check canonical JSONs reference valid device IDs
+          for json_file in Path("data/canonical").glob("*.json"):
+              device_id = json_file.stem.rsplit("_", 1)[0]  # Remove _windows or _linux
+              if device_id not in csv_devices:
+                  errors.append(f"{json_file}: device_id '{device_id}' not in CSV")
+          
+          # Check diff reports reference valid device IDs
+          for json_file in Path("reports").glob("*_diff.json"):
+              device_id = json_file.stem.replace("_diff", "")
+              if device_id not in csv_devices:
+                  errors.append(f"{json_file}: device_id '{device_id}' not in CSV")
+          
+          if errors:
+              print("\n❌ Cross-reference errors found:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+          else:
+              print("\n✓ All cross-references are valid")
+          EOF
+          
+          python validate_refs.py
+      
+      - name: Validate helper scripts exist
+        run: |
+          echo "Checking for required helper scripts..."
+          
+          SCRIPTS=(
+            "scripts/collect_windows.ps1"
+            "scripts/collect_linux.sh"
+            "tools/normalize.py"
+            "tools/diff_engine.py"
+          )
+          
+          for script in "${SCRIPTS[@]}"; do
+            if [ ! -f "$script" ]; then
+              echo "❌ Missing script: $script"
+              exit 1
+            fi
+            echo "✓ Found: $script"
+          done
+          
+          echo "✓ All helper scripts exist"
+      
+      - name: Validation summary
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "✓ All validations passed!"
+          echo "=========================================="
+          echo ""
+          echo "Repository is ready for device-by-device execution."
