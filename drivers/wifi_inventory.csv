@@ -1,0 +1,2 @@
+device_id,device_name,chipset,vendor,windows_collected,linux_collected,normalized,diffed,notes
+intel_ax210,Intel Wi-Fi 6E AX210,MT7927,Intel,yes,yes,yes,yes,First iteration device - SYNTHETIC placeholder data
