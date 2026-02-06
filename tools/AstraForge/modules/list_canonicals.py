@@ -17,5 +17,5 @@ def list_canonical_files(output_dir: Optional[Path] = None) -> List[Path]:
     return sorted(
         path
         for path in output_dir.rglob("canonical_*")
-        if path.is_file()
+        if path.is_file() and path.suffix == ".json"
     )

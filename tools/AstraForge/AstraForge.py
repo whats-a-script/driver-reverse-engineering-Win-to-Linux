@@ -47,7 +47,11 @@ def _handle_summarize(args: argparse.Namespace) -> int:
             print("ERROR: canonical JSON path is required.")
             return 1
         canonical_path = prompt_value
-    summary = summarize_capabilities.summarize_capabilities(Path(canonical_path))
+    canonical_file = Path(canonical_path)
+    if not canonical_file.is_file():
+        print(f"ERROR: canonical JSON file not found: {canonical_file}")
+        return 1
+    summary = summarize_capabilities.summarize_capabilities(canonical_file)
     print(summary)
     return 0
 

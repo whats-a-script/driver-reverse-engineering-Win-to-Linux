@@ -38,6 +38,12 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from AstraForge.modules import chipset_detector
+
 
 def normalize_windows(device_id: str, chipset: str) -> dict:
     """
@@ -148,8 +154,7 @@ def main():
     print()
     
     # Determine paths
-    script_dir = Path(__file__).parent
-    repo_root = script_dir.parent
+    repo_root = SCRIPT_DIR.parent
     raw_data_path = repo_root / "data" / "raw" / platform / device_id
     canonical_path = repo_root / "data" / "canonical"
     output_file = canonical_path / f"{device_id}_{platform}.json"
@@ -158,10 +163,6 @@ def main():
     print(f"Output: {output_file}")
     print()
     
-    if str(script_dir) not in sys.path:
-        sys.path.insert(0, str(script_dir))
-    from AstraForge.modules import chipset_detector
-
     vendor_id, device_id_value, subsystem = chipset_detector._extract_pci_ids(
         raw_data_path, platform
     )
@@ -169,6 +170,7 @@ def main():
         vendor_id or "", device_id_value or "", subsystem
     )
     if detected_chipset == "unknown":
+        # Fallback to folder name when PCI detection fails.
         detected_chipset = raw_data_path.name or device_id
 
     # Normalize based on platform

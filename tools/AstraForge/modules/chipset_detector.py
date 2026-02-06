@@ -116,6 +116,10 @@ def detect_chipset(pci_vendor: str, pci_device: str, subsystem: str | None) -> s
     """Return chipset name or 'unknown'."""
     vendor_id = _normalize_id(pci_vendor)
     device_id = _normalize_id(pci_device)
+    if (not vendor_id or not device_id) and subsystem and ":" in subsystem:
+        subsystem_vendor, subsystem_device = subsystem.split(":", 1)
+        vendor_id = vendor_id or _normalize_id(subsystem_vendor)
+        device_id = device_id or _normalize_id(subsystem_device)
     if not vendor_id or not device_id:
         return "unknown"
     key = f"{vendor_id}:{device_id}"

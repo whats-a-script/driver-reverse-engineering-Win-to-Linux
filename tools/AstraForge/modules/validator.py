@@ -53,7 +53,7 @@ def _validate_file(path: Path, required: bool, report: Dict[str, List[str]]) -> 
 
 def _iter_device_dirs(base_path: Path) -> Iterable[Path]:
     if not base_path.exists():
-        return []
+        return iter(())
     return (entry for entry in base_path.iterdir() if entry.is_dir())
 
 
