@@ -76,6 +76,7 @@ When adding new devices:
 - `scripts/collect_linux.sh` - Linux driver collection  
 - `tools/normalize.py` - Convert to canonical JSON
 - `tools/diff_engine.py` - Cross-platform comparison
+- `tools/AstraForge/AstraForge.py` - Modular AstraForge CLI (validate, summarize, list-canonicals)
 
 ## License
 

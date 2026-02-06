@@ -39,7 +39,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-def normalize_windows(device_id: str) -> dict:
+def normalize_windows(device_id: str, chipset: str) -> dict:
     """
     Normalize Windows driver data to canonical JSON format.
     
@@ -56,10 +56,10 @@ def normalize_windows(device_id: str) -> dict:
     print("  - Parse INF files for device info")
     print("  - Identify register addresses from strings/data")
     
-    return create_placeholder_canonical(device_id, "windows")
+    return create_placeholder_canonical(device_id, "windows", chipset)
 
 
-def normalize_linux(device_id: str) -> dict:
+def normalize_linux(device_id: str, chipset: str) -> dict:
     """
     Normalize Linux driver data to canonical JSON format.
     
@@ -76,10 +76,10 @@ def normalize_linux(device_id: str) -> dict:
     print("  - Parse #define statements for registers")
     print("  - Extract MODULE_DEVICE_TABLE entries")
     
-    return create_placeholder_canonical(device_id, "linux")
+    return create_placeholder_canonical(device_id, "linux", chipset)
 
 
-def create_placeholder_canonical(device_id: str, platform: str) -> dict:
+def create_placeholder_canonical(device_id: str, platform: str, chipset: str) -> dict:
     """
     Create a placeholder canonical JSON structure.
     
@@ -94,7 +94,7 @@ def create_placeholder_canonical(device_id: str, platform: str) -> dict:
             "driver_version": "0.0.0.SYNTHETIC",
             "driver_date": datetime.now().strftime("%Y-%m-%d"),
             "vendor": "Unknown",
-            "chipset": "MT7927",
+            "chipset": chipset,
             "source_url": None,  # Do not invent URLs
             "collection_date": datetime.now().strftime("%Y-%m-%d"),
             "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
@@ -158,11 +158,24 @@ def main():
     print(f"Output: {output_file}")
     print()
     
+    if str(script_dir) not in sys.path:
+        sys.path.insert(0, str(script_dir))
+    from AstraForge.modules import chipset_detector
+
+    vendor_id, device_id_value, subsystem = chipset_detector._extract_pci_ids(
+        raw_data_path, platform
+    )
+    detected_chipset = chipset_detector.detect_chipset(
+        vendor_id or "", device_id_value or "", subsystem
+    )
+    if detected_chipset == "unknown":
+        detected_chipset = raw_data_path.name or device_id
+
     # Normalize based on platform
     if platform == "windows":
-        canonical_data = normalize_windows(device_id)
+        canonical_data = normalize_windows(device_id, detected_chipset)
     else:
-        canonical_data = normalize_linux(device_id)
+        canonical_data = normalize_linux(device_id, detected_chipset)
     
     # Create output directory if needed
     canonical_path.mkdir(parents=True, exist_ok=True)
