@@ -63,28 +63,31 @@ def compute_hardware_id_hash(vendor_id: str, device_id: str,
     
     Format: VEN_<vendor>|DEV_<device>|SUBSYS_<subsystem>|REV_<revision>
     
+    Note: Vendor, device, and subsystem IDs are 16-bit values (4 hex chars),
+    while revision is an 8-bit value (2 hex chars), per PCI specification.
+    
     Args:
         vendor_id: PCI vendor ID (hex string)
         device_id: PCI device ID (hex string)
         subsystem_id: Optional subsystem ID (hex string)
-        revision: Optional revision (hex string)
+        revision: Optional revision (hex string, 8-bit value)
         
     Returns:
         SHA-256 hash as hex string
     """
-    # Normalize IDs (remove 0x prefix, lowercase, pad to 4 chars)
-    def normalize_id(id_str: Optional[str]) -> str:
+    # Normalize IDs (remove 0x prefix, lowercase, pad to proper length)
+    def normalize_id(id_str: Optional[str], width: int = 4) -> str:
         if not id_str:
-            return "0000"
+            return "0" * width
         cleaned = id_str.strip().lower()
         if cleaned.startswith("0x"):
             cleaned = cleaned[2:]
-        return cleaned.zfill(4)
+        return cleaned.zfill(width)
     
-    vendor = normalize_id(vendor_id)
-    device = normalize_id(device_id)
-    subsys = normalize_id(subsystem_id) if subsystem_id else "0000"
-    rev = normalize_id(revision) if revision else "00"
+    vendor = normalize_id(vendor_id, 4)  # 16-bit
+    device = normalize_id(device_id, 4)  # 16-bit
+    subsys = normalize_id(subsystem_id, 4) if subsystem_id else "0000"  # 16-bit
+    rev = normalize_id(revision, 2) if revision else "00"  # 8-bit per PCI spec
     
     # Build normalized string
     normalized = f"VEN_{vendor}|DEV_{device}|SUBSYS_{subsys}|REV_{rev}"
