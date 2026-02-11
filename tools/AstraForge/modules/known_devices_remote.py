@@ -240,7 +240,6 @@ def build_driver_list_from_github() -> dict:
                 catalog["total_count"] += 1
     
     # Add timestamp
-    from datetime import datetime
     catalog["timestamp"] = datetime.now().isoformat()
     
     return catalog
