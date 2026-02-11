@@ -10,7 +10,7 @@ from typing import Dict, Iterable, List, Optional
 WINDOWS_REQUIRED = ("pci_device.json", "driver_package.json", "driver_files.json")
 WINDOWS_OPTIONAL = ("registry.json", "systeminfo.txt", "netsh_wlan_drivers.txt")
 LINUX_REQUIRED = ("lspci.txt",)
-LINUX_OPTIONAL = ("uname.txt", "iw_list.txt", "iw_dev.txt", "dmesg.txt", "rfkill.txt")
+LINUX_OPTIONAL = ("uname.txt", "iw_list.txt", "iw_dev.txt", "dmesg.txt", "rfkill.txt", "modinfo.txt")
 
 WINDOWS_JSON = {
     "pci_device.json",
