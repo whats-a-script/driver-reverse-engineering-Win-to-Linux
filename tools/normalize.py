@@ -43,26 +43,33 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from AstraForge.modules import chipset_detector
+import normalize_windows as norm_win
 
 
-def normalize_windows(device_id: str, chipset: str) -> dict:
+def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
     """
     Normalize Windows driver data to canonical JSON format.
     
-    TODO: Implement:
+    Phase 1 Implementation:
+    - Extract driver metadata from driver_files.json and driver_package.json
+    - Populate canonical['driver']['files'], version, provider, date
+    - Populate canonical['device']['manufacturer']
+    
+    TODO for future phases:
     - PE file parsing for .sys files
-    - INF file parsing for device metadata
     - Export/import table analysis
     - String extraction for register names
-    - Version resource parsing
     """
-    print(f"[TODO] Windows normalization for {device_id}")
-    print("  - Parse PE headers from .sys files")
-    print("  - Extract exports and imports")
-    print("  - Parse INF files for device info")
-    print("  - Identify register addresses from strings/data")
+    print(f"Normalizing Windows driver for {device_id}")
+    print(f"  Reading from: {raw_data_path}")
     
-    return create_placeholder_canonical(device_id, "windows", chipset)
+    # Create base canonical structure
+    canonical = create_placeholder_canonical(device_id, "windows", chipset)
+    
+    # Phase 1: Extract driver data from JSON files
+    canonical = norm_win.populate_windows_driver_data(canonical, raw_data_path)
+    
+    return canonical
 
 
 def normalize_linux(device_id: str, chipset: str) -> dict:
@@ -175,7 +182,7 @@ def main():
 
     # Normalize based on platform
     if platform == "windows":
-        canonical_data = normalize_windows(device_id, detected_chipset)
+        canonical_data = normalize_windows(device_id, detected_chipset, raw_data_path)
     else:
         canonical_data = normalize_linux(device_id, detected_chipset)
     

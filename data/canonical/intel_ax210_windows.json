@@ -4,11 +4,11 @@
   "platform": "windows",
   "metadata": {
     "driver_version": "0.0.0.SYNTHETIC",
-    "driver_date": "2026-02-01",
+    "driver_date": "2026-02-11",
     "vendor": "Unknown",
-    "chipset": "MT7927",
+    "chipset": "ax210",
     "source_url": null,
-    "collection_date": "2026-02-01",
+    "collection_date": "2026-02-11",
     "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
   },
   "windows_nav_card": {
@@ -34,5 +34,34 @@
       "signature": "void placeholder_function(void)",
       "purpose": "Placeholder function for scaffolding"
     }
-  ]
+  ],
+  "driver": {
+    "files": [
+      {
+        "name": "Netwtw10.sys",
+        "type": "sys",
+        "size_bytes": 8388608,
+        "hash_sha256": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+        "version": "22.240.0.7",
+        "product_name": "Intel(R) Wireless WiFi Link Driver",
+        "file_description": "Intel(R) Wireless WiFi Link Driver"
+      },
+      {
+        "name": "Netwtw10.inf",
+        "type": "inf",
+        "size_bytes": 245760
+      },
+      {
+        "name": "Netwtw10.cat",
+        "type": "cat",
+        "size_bytes": 12345
+      }
+    ],
+    "version": "22.240.0.7",
+    "provider": "Intel Corporation",
+    "date": "2024-06-15"
+  },
+  "device": {
+    "manufacturer": "Intel"
+  }
 }
