@@ -4,11 +4,11 @@
   "platform": "linux",
   "metadata": {
     "driver_version": "0.0.0.SYNTHETIC",
-    "driver_date": "2026-02-01",
+    "driver_date": "2026-02-11",
     "vendor": "Unknown",
-    "chipset": "MT7927",
+    "chipset": "intel_ax210",
     "source_url": null,
-    "collection_date": "2026-02-01",
+    "collection_date": "2026-02-11",
     "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
   },
   "windows_nav_card": null,
@@ -30,5 +30,65 @@
       "signature": "void placeholder_function(void)",
       "purpose": "Placeholder function for scaffolding"
     }
-  ]
+  ],
+  "driver": {
+    "files": [
+      {
+        "name": "iwlwifi.ko",
+        "type": "ko"
+      },
+      {
+        "name": "iwlwifi-ty-a0-gf-a0-72.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-ty-a0-gf-a0-71.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-ty-a0-gf-a0-67.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-so-a0-gf-a0-72.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-so-a0-gf-a0-71.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-so-a0-gf-a0-67.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-so-a0-hr-b0-72.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-so-a0-hr-b0-71.ucode",
+        "type": "firmware"
+      },
+      {
+        "name": "iwlwifi-so-a0-hr-b0-67.ucode",
+        "type": "firmware"
+      }
+    ],
+    "version": "kernel-6.1.0-17-amd64",
+    "provider": "Intel Corporation <linuxwifi@intel.com>",
+    "description": "Intel(R) Wireless WiFi driver for Linux",
+    "license": "GPL",
+    "firmware_references": [
+      "iwlwifi-ty-a0-gf-a0-72.ucode",
+      "iwlwifi-ty-a0-gf-a0-71.ucode",
+      "iwlwifi-ty-a0-gf-a0-67.ucode",
+      "iwlwifi-so-a0-gf-a0-72.ucode",
+      "iwlwifi-so-a0-gf-a0-71.ucode",
+      "iwlwifi-so-a0-gf-a0-67.ucode",
+      "iwlwifi-so-a0-hr-b0-72.ucode",
+      "iwlwifi-so-a0-hr-b0-71.ucode",
+      "iwlwifi-so-a0-hr-b0-67.ucode"
+    ]
+  },
+  "device": {}
 }
