@@ -1,8 +1,9 @@
-"""Remote GitHub-hosted known-devices support.
+"""Remote GitHub-hosted known-devices support with self-updating capabilities.
 
 This module provides functions to fetch known-device data from a remote
-GitHub repository branch, check for remote existence, and sync remote
-data to the local repository.
+GitHub repository branch, check for remote existence, sync remote data
+to the local repository, and automatically update when newer versions
+are available.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from typing import Optional, List, Tuple
+from datetime import datetime, timedelta
 from . import known_devices
 
 
@@ -20,6 +22,11 @@ from . import known_devices
 DEFAULT_GITHUB_OWNER = "whats-a-script"
 DEFAULT_GITHUB_REPO = "TP-link-wifi-MT7927-reverse-engineer"
 DEFAULT_GITHUB_BRANCH = "main"
+
+# Auto-update configuration
+AUTO_UPDATE_ENABLED = True  # Enable auto-updates by default
+AUTO_UPDATE_CHECK_INTERVAL_HOURS = 24  # Check for updates every 24 hours
+UPDATE_METADATA_FILE = ".known_devices_update_metadata.json"
 
 
 def _get_github_config() -> Tuple[str, str, str]:
@@ -108,7 +115,7 @@ def cache_remote_known_device(chipset: str, platform: str, data: dict) -> bool:
     Cache remote known-device data to the local repository.
     
     This is a convenience wrapper around known_devices.save_known_device()
-    that adds metadata about the remote source.
+    that adds metadata about the remote source and caching timestamp.
     
     Args:
         chipset: The chipset identifier (e.g., 'mt7927', 'ax210')
@@ -124,6 +131,7 @@ def cache_remote_known_device(chipset: str, platform: str, data: dict) -> bool:
     
     data["metadata"]["cached_from_remote"] = True
     data["metadata"]["remote_url"] = _build_remote_url(chipset, platform)
+    data["metadata"]["local_cache_timestamp"] = datetime.now().isoformat()
     
     return known_devices.save_known_device(chipset, platform, data)
 
@@ -327,3 +335,287 @@ def get_known_device_with_fallback(chipset: str, platform: str) -> Optional[dict
             return data
     
     return None
+
+
+def _get_update_metadata_path() -> Path:
+    """Get the path to the update metadata file."""
+    known_devices_root = known_devices.get_known_devices_root()
+    return known_devices_root / UPDATE_METADATA_FILE
+
+
+def _load_update_metadata() -> dict:
+    """Load update metadata from file."""
+    metadata_path = _get_update_metadata_path()
+    
+    if not metadata_path.exists():
+        return {
+            "last_check": None,
+            "last_update": None,
+            "devices": {}
+        }
+    
+    try:
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {
+            "last_check": None,
+            "last_update": None,
+            "devices": {}
+        }
+
+
+def _save_update_metadata(metadata: dict) -> bool:
+    """Save update metadata to file."""
+    metadata_path = _get_update_metadata_path()
+    
+    try:
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, indent=2)
+        return True
+    except (OSError, TypeError):
+        return False
+
+
+def _should_check_for_updates() -> bool:
+    """
+    Determine if we should check for updates based on last check time.
+    
+    Returns:
+        True if enough time has passed since last check, False otherwise
+    """
+    if not AUTO_UPDATE_ENABLED:
+        return False
+    
+    metadata = _load_update_metadata()
+    last_check_str = metadata.get("last_check")
+    
+    if not last_check_str:
+        return True  # Never checked before
+    
+    try:
+        last_check = datetime.fromisoformat(last_check_str)
+        now = datetime.now()
+        elapsed = now - last_check
+        
+        return elapsed > timedelta(hours=AUTO_UPDATE_CHECK_INTERVAL_HOURS)
+    except (ValueError, TypeError):
+        return True  # Invalid timestamp, check again
+
+
+def _is_remote_newer(local_data: dict, remote_data: dict) -> bool:
+    """
+    Compare timestamps to determine if remote data is newer.
+    
+    Args:
+        local_data: Local known-device data
+        remote_data: Remote known-device data
+        
+    Returns:
+        True if remote is newer, False otherwise
+    """
+    local_updated = local_data.get("metadata", {}).get("last_updated")
+    remote_updated = remote_data.get("metadata", {}).get("last_updated")
+    
+    # If either doesn't have timestamp, assume remote is newer to be safe
+    if not local_updated:
+        return True
+    if not remote_updated:
+        return False
+    
+    try:
+        local_date = datetime.fromisoformat(local_updated)
+        remote_date = datetime.fromisoformat(remote_updated)
+        return remote_date > local_date
+    except (ValueError, TypeError):
+        # Can't parse dates, assume remote is newer
+        return True
+
+
+def check_for_updates(platform: Optional[str] = None, verbose: bool = True) -> dict:
+    """
+    Check for updates to known-device data from remote repository.
+    
+    This function compares local known-devices with remote versions and
+    identifies which devices have updates available.
+    
+    Args:
+        platform: Optional platform filter ('windows' or 'linux')
+        verbose: Print progress messages
+        
+    Returns:
+        Dictionary with update check results
+    """
+    results = {
+        "updates_available": [],
+        "up_to_date": [],
+        "new_devices": [],
+        "errors": []
+    }
+    
+    platforms_to_check = [platform] if platform else ["windows", "linux"]
+    
+    # Check manifest for available devices
+    manifest = fetch_remote_manifest()
+    if not manifest:
+        results["errors"].append("Failed to fetch remote manifest")
+        return results
+    
+    for plat in platforms_to_check:
+        remote_chipsets = list_remote_known_devices(plat)
+        
+        for chipset in remote_chipsets:
+            # Check if we have it locally
+            if known_devices.is_known_device(chipset, plat):
+                # Compare versions
+                local_data = known_devices.load_known_device(chipset, plat)
+                remote_data = fetch_remote_known_device(chipset, plat)
+                
+                if local_data and remote_data:
+                    if _is_remote_newer(local_data, remote_data):
+                        results["updates_available"].append({
+                            "chipset": chipset,
+                            "platform": plat,
+                            "local_version": local_data.get("metadata", {}).get("last_updated"),
+                            "remote_version": remote_data.get("metadata", {}).get("last_updated")
+                        })
+                        if verbose:
+                            print(f"  Update available: {chipset}/{plat}")
+                    else:
+                        results["up_to_date"].append({
+                            "chipset": chipset,
+                            "platform": plat
+                        })
+                else:
+                    results["errors"].append(f"Failed to load {chipset}/{plat}")
+            else:
+                # New device not in local cache
+                results["new_devices"].append({
+                    "chipset": chipset,
+                    "platform": plat
+                })
+                if verbose:
+                    print(f"  New device available: {chipset}/{plat}")
+    
+    # Update metadata
+    metadata = _load_update_metadata()
+    metadata["last_check"] = datetime.now().isoformat()
+    _save_update_metadata(metadata)
+    
+    return results
+
+
+def auto_update(platform: Optional[str] = None, verbose: bool = True) -> dict:
+    """
+    Automatically update known-device data from remote repository.
+    
+    This checks for updates and downloads newer versions. Only updates
+    devices that were originally cached from remote (not manually created local files).
+    
+    Args:
+        platform: Optional platform filter ('windows' or 'linux')
+        verbose: Print progress messages
+        
+    Returns:
+        Dictionary with update results
+    """
+    results = {
+        "updated": 0,
+        "added": 0,
+        "failed": 0,
+        "skipped": 0,
+        "devices": []
+    }
+    
+    if not AUTO_UPDATE_ENABLED:
+        if verbose:
+            print("Auto-update is disabled")
+        return results
+    
+    if verbose:
+        print("Checking for updates...")
+    
+    # Check what needs updating
+    update_check = check_for_updates(platform, verbose=False)
+    
+    # Update existing devices with newer versions
+    for item in update_check["updates_available"]:
+        chipset = item["chipset"]
+        plat = item["platform"]
+        
+        # Only auto-update if it was cached from remote originally
+        local_data = known_devices.load_known_device(chipset, plat)
+        if local_data and local_data.get("metadata", {}).get("cached_from_remote"):
+            remote_data = fetch_remote_known_device(chipset, plat)
+            if remote_data and cache_remote_known_device(chipset, plat, remote_data):
+                results["updated"] += 1
+                results["devices"].append({
+                    "chipset": chipset,
+                    "platform": plat,
+                    "action": "updated"
+                })
+                if verbose:
+                    print(f"  ✓ Updated {chipset}/{plat}")
+            else:
+                results["failed"] += 1
+                if verbose:
+                    print(f"  ✗ Failed to update {chipset}/{plat}")
+        else:
+            results["skipped"] += 1
+            if verbose:
+                print(f"  ⊘ Skipped {chipset}/{plat} (manual local file)")
+    
+    # Add new devices
+    for item in update_check["new_devices"]:
+        chipset = item["chipset"]
+        plat = item["platform"]
+        
+        remote_data = fetch_remote_known_device(chipset, plat)
+        if remote_data and cache_remote_known_device(chipset, plat, remote_data):
+            results["added"] += 1
+            results["devices"].append({
+                "chipset": chipset,
+                "platform": plat,
+                "action": "added"
+            })
+            if verbose:
+                print(f"  ✓ Added {chipset}/{plat}")
+        else:
+            results["failed"] += 1
+            if verbose:
+                print(f"  ✗ Failed to add {chipset}/{plat}")
+    
+    # Update metadata
+    if results["updated"] > 0 or results["added"] > 0:
+        metadata = _load_update_metadata()
+        metadata["last_update"] = datetime.now().isoformat()
+        _save_update_metadata(metadata)
+    
+    if verbose:
+        print(f"\nUpdate summary: {results['updated']} updated, {results['added']} added, "
+              f"{results['skipped']} skipped, {results['failed']} failed")
+    
+    return results
+
+
+def get_known_device_with_auto_update(chipset: str, platform: str) -> Optional[dict]:
+    """
+    Get known-device data with automatic update checking.
+    
+    This is an enhanced version of get_known_device_with_fallback() that
+    also checks if local data needs updating and refreshes it automatically.
+    
+    Args:
+        chipset: The chipset identifier (e.g., 'mt7927', 'ax210')
+        platform: The platform ('windows' or 'linux')
+        
+    Returns:
+        Dictionary with known-device data, or None if not found anywhere
+    """
+    # Check if it's time to check for updates
+    if _should_check_for_updates():
+        # Run auto-update silently
+        auto_update(platform=platform, verbose=False)
+    
+    # Now get the device (should be up-to-date)
+    return get_known_device_with_fallback(chipset, platform)

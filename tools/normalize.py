@@ -71,9 +71,9 @@ def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
     # Phase 1: Extract driver data from JSON files
     canonical = norm_win.populate_windows_driver_data(canonical, raw_data_path)
     
-    # Check for known-device data (local first, then remote)
+    # Check for known-device data (local first, then remote, with auto-update)
     print(f"  Checking for known-device data for chipset: {chipset}")
-    known = known_devices_remote.get_known_device_with_fallback(chipset, "windows")
+    known = known_devices_remote.get_known_device_with_auto_update(chipset, "windows")
     
     if known:
         print(f"  ✓ Found known-device data for {chipset}")
@@ -105,9 +105,9 @@ def normalize_linux(device_id: str, chipset: str) -> dict:
     
     canonical = create_placeholder_canonical(device_id, "linux", chipset)
     
-    # Check for known-device data (local first, then remote)
+    # Check for known-device data (local first, then remote, with auto-update)
     print(f"  Checking for known-device data for chipset: {chipset}")
-    known = known_devices_remote.get_known_device_with_fallback(chipset, "linux")
+    known = known_devices_remote.get_known_device_with_auto_update(chipset, "linux")
     
     if known:
         print(f"  ✓ Found known-device data for {chipset}")

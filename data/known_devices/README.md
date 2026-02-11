@@ -1,15 +1,37 @@
-# Known-Devices System with GitHub Sync
+# Known-Devices System with GitHub Sync and Self-Updating
 
 ## Overview
 
-The known-devices system provides AstraForge with intelligence about well-characterized WiFi chipsets. When normalizing driver data, AstraForge can automatically:
+The known-devices system provides AstraForge with **self-updating intelligence** about well-characterized WiFi chipsets. When normalizing driver data, AstraForge can automatically:
 
 1. Check the local known-devices repository
 2. Fall back to remote GitHub-hosted known-devices
 3. Cache remote data locally for future use
-4. Build a complete driver catalog from GitHub repositories
+4. **Automatically check for and download updates** from remote sources
+5. Build a complete driver catalog from GitHub repositories
 
-This enables AstraForge to auto-bootstrap itself with baseline knowledge instead of starting from zero for each device.
+This enables AstraForge to auto-bootstrap itself with baseline knowledge and **stay up-to-date automatically** instead of requiring manual updates.
+
+## Key Features
+
+### 🔄 Self-Updating Intelligence
+- Automatically checks for updates every 24 hours (configurable)
+- Downloads newer versions of known-device data from remote repository
+- Only updates devices that were originally from remote (preserves manual local files)
+- Tracks last check and update timestamps
+- Graceful fallback if remote is unavailable
+
+### 📦 Smart Caching
+- Remote data is cached locally on first access
+- Local cache is automatically refreshed when newer versions are available
+- Version/timestamp comparison ensures you always have the latest data
+- Manual local files always take precedence over remote
+
+### 🎯 Zero Configuration
+- Works out of the box with sensible defaults
+- Automatically integrates with normalization process
+- No user intervention required for updates
+- Can be disabled or configured via environment variables
 
 ## Architecture
 
@@ -78,13 +100,17 @@ Each known-device file follows this schema:
 
 ### Environment Variables
 
-Configure the remote GitHub source using environment variables:
+Configure the remote GitHub source and auto-update behavior using environment variables:
 
 ```bash
 # GitHub repository configuration
 export KNOWN_DEVICES_GITHUB_OWNER="whats-a-script"
 export KNOWN_DEVICES_GITHUB_REPO="TP-link-wifi-MT7927-reverse-engineer"
 export KNOWN_DEVICES_GITHUB_BRANCH="main"
+
+# Auto-update configuration (optional)
+export KNOWN_DEVICES_AUTO_UPDATE="true"  # Enable/disable auto-updates
+export KNOWN_DEVICES_UPDATE_INTERVAL="24"  # Check interval in hours
 ```
 
 ### Default Configuration
@@ -94,15 +120,18 @@ If not configured, the system uses these defaults:
 - **Owner**: `whats-a-script`
 - **Repo**: `TP-link-wifi-MT7927-reverse-engineer`
 - **Branch**: `main`
+- **Auto-Update**: Enabled
+- **Check Interval**: 24 hours
 
 ## Usage
 
-### Automatic Integration
+### Automatic Integration with Self-Updating
 
-The known-devices system is automatically integrated into the normalization process:
+The known-devices system is automatically integrated into the normalization process **with self-updating enabled**:
 
 ```bash
 # Normalizing a device automatically checks for known-device data
+# AND checks for updates if 24 hours have passed since last check
 python tools/normalize.py intel_ax210 windows
 ```
 
@@ -115,7 +144,150 @@ Normalizing Windows driver for intel_ax210
   ✓ Found known-device data for ax210
 ```
 
-### Manual Operations
+**First time**: Fetches from remote and caches locally  
+**Subsequent runs**: Uses local cache  
+**After 24 hours**: Automatically checks for and downloads updates
+
+### Command-Line Management Tool
+
+Use the `known_devices_cli.py` tool for manual operations:
+
+#### Show System Status
+```bash
+python tools/known_devices_cli.py status
+```
+
+Output shows:
+- Number of cached devices per platform
+- Auto-update configuration and status
+- Last check/update timestamps
+- Remote repository availability
+
+#### List All Known Devices
+```bash
+python tools/known_devices_cli.py list
+```
+
+Shows all cached devices with vendor and source (local/remote).
+
+#### Check for Updates
+```bash
+python tools/known_devices_cli.py check-updates
+
+# Check specific platform only
+python tools/known_devices_cli.py check-updates --platform windows
+```
+
+Reports which devices have updates available, which are up-to-date, and any new devices.
+
+#### Update Known-Devices
+```bash
+python tools/known_devices_cli.py update
+
+# Update specific platform only
+python tools/known_devices_cli.py update --platform linux
+```
+
+Downloads and installs all available updates.
+
+#### Sync All from Remote
+```bash
+python tools/known_devices_cli.py sync
+
+# Sync specific platform only
+python tools/known_devices_cli.py sync --platform windows
+```
+
+Downloads all remote known-devices, even those not cached yet.
+
+#### Show Device Info
+```bash
+python tools/known_devices_cli.py info mt7927 windows
+```
+
+Shows detailed information about a specific known-device.
+
+#### Build Driver Catalog
+```bash
+# Print to stdout
+python tools/known_devices_cli.py build-catalog
+
+# Save to file
+python tools/known_devices_cli.py build-catalog --output catalog.json
+```
+
+Builds a complete catalog of all available drivers from GitHub.
+
+## Self-Updating Behavior
+
+### How Auto-Update Works
+
+1. **Periodic Check**: Every 24 hours (configurable), the system checks for updates
+2. **Version Comparison**: Compares `last_updated` timestamps between local and remote
+3. **Selective Update**: Only updates devices that were cached from remote originally
+4. **Preserves Manual Files**: Never overwrites manually created local files
+5. **Graceful Degradation**: If remote is unavailable, uses local cache without errors
+
+### Update Metadata
+
+The system maintains update metadata in `.known_devices_update_metadata.json`:
+
+```json
+{
+  "last_check": "2026-02-11T21:30:00",
+  "last_update": "2026-02-11T21:30:00",
+  "devices": {}
+}
+```
+
+This tracks when the last update check occurred and when devices were last updated.
+
+### Controlling Auto-Updates
+
+#### Disable Auto-Updates Globally
+```python
+# In your code
+from AstraForge.modules import known_devices_remote
+known_devices_remote.AUTO_UPDATE_ENABLED = False
+```
+
+Or via environment variable:
+```bash
+export KNOWN_DEVICES_AUTO_UPDATE="false"
+```
+
+#### Adjust Check Interval
+```python
+# Check every 6 hours instead of 24
+from AstraForge.modules import known_devices_remote
+known_devices_remote.AUTO_UPDATE_CHECK_INTERVAL_HOURS = 6
+```
+
+Or via environment variable:
+```bash
+export KNOWN_DEVICES_UPDATE_INTERVAL="6"
+```
+
+#### Force Immediate Update
+```bash
+python tools/known_devices_cli.py update
+```
+
+This bypasses the check interval and updates immediately.
+
+### Update Priority and Safety
+
+**Priority Chain**:
+1. **Manual local files** (created by user) are never auto-updated
+2. **Cached remote files** are updated when newer versions are available
+3. **New remote files** are automatically downloaded and cached
+
+**Safety Guarantees**:
+- Local changes are never overwritten
+- Updates only apply to remote-sourced files
+- Failed updates don't corrupt existing data
+- System continues working if remote is unavailable
+- No data loss on update failures
 
 #### Check if a Device is Known
 
