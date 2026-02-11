@@ -48,6 +48,10 @@
       "purpose": "Probe and initialize Intel WiFi device"
     }
   ],
+  "device": {
+    "hardware_id_hash": "5d6793b8c9c9bb64044944571acc04d56afec43b4a2d34f081295f06ce80cd9c",
+    "manufacturer": "Intel Corporation"
+  },
   "driver": {
     "files": [
       {
@@ -66,9 +70,6 @@
     "provider": "Intel Corporation",
     "date": "2023-10-15"
   },
-  "device": {
-    "manufacturer": "Intel Corporation"
-  },
   "firmware": {
     "known_blobs": [
       "iwlwifi-ty-a0-gf-a0.pnvm",
@@ -77,7 +78,11 @@
   },
   "known_device_validation": {
     "known_device_matched": true,
+    "hardware_hash_match": false,
+    "driver_version_match": false,
+    "missing_fields": [],
     "warnings": [
+      "Hardware ID hash mismatch: expected 9ff34b3087da657af8ca575cfb2e9648f0bff92bfbbdd16725e3b2a8a25616ad, found 5d6793b8c9c9bb64044944571acc04d56afec43b4a2d34f081295f06ce80cd9c",
       "Driver version mismatch: expected 22.210.0.2, found 0.0.0.SYNTHETIC"
     ],
     "info": []

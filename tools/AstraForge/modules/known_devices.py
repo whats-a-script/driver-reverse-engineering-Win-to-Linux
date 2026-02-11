@@ -1,12 +1,14 @@
-"""Local known-devices repository handler.
+"""Local known-devices repository handler with hardware-ID hashing support.
 
 This module manages the local known-devices repository and provides
 functions to check if a device is known and load its canonical data.
+Supports lookup by chipset name or hardware-ID hash.
 """
 
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 from typing import Optional
 
@@ -16,6 +18,79 @@ def get_known_devices_root() -> Path:
     current_file = Path(__file__).resolve()
     repo_root = current_file.parents[3]
     return repo_root / "data" / "known_devices"
+
+
+def find_by_hardware_hash(hardware_hash: str, platform: str) -> Optional[dict]:
+    """
+    Find a known-device by its hardware-ID hash.
+    
+    This searches all known-device files in the platform directory
+    and returns the first one that matches the hardware_id_hash.
+    
+    Args:
+        hardware_hash: The SHA-256 hardware ID hash to search for
+        platform: The platform ('windows' or 'linux')
+        
+    Returns:
+        Dictionary with known-device data, or None if not found
+    """
+    known_devices_root = get_known_devices_root()
+    platform_dir = known_devices_root / platform
+    
+    if not platform_dir.exists():
+        return None
+    
+    # Search all JSON files in the platform directory
+    for device_file in platform_dir.glob("*.json"):
+        try:
+            with open(device_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+            # Check if this device matches the hardware hash
+            if data.get("hardware_id_hash") == hardware_hash:
+                return data
+        except (json.JSONDecodeError, OSError):
+            continue
+    
+    return None
+
+
+def compute_hardware_id_hash(vendor_id: str, device_id: str, 
+                             subsystem_id: Optional[str] = None,
+                             revision: Optional[str] = None) -> str:
+    """
+    Compute a deterministic SHA-256 hash from hardware identifiers.
+    
+    Format: VEN_<vendor>|DEV_<device>|SUBSYS_<subsystem>|REV_<revision>
+    
+    Args:
+        vendor_id: PCI vendor ID (hex string)
+        device_id: PCI device ID (hex string)
+        subsystem_id: Optional subsystem ID (hex string)
+        revision: Optional revision (hex string)
+        
+    Returns:
+        SHA-256 hash as hex string
+    """
+    # Normalize IDs (remove 0x prefix, lowercase, pad to 4 chars)
+    def normalize_id(id_str: Optional[str]) -> str:
+        if not id_str:
+            return "0000"
+        cleaned = id_str.strip().lower()
+        if cleaned.startswith("0x"):
+            cleaned = cleaned[2:]
+        return cleaned.zfill(4)
+    
+    vendor = normalize_id(vendor_id)
+    device = normalize_id(device_id)
+    subsys = normalize_id(subsystem_id) if subsystem_id else "0000"
+    rev = normalize_id(revision) if revision else "00"
+    
+    # Build normalized string
+    normalized = f"VEN_{vendor}|DEV_{device}|SUBSYS_{subsys}|REV_{rev}"
+    
+    # Compute SHA-256
+    return hashlib.sha256(normalized.encode()).hexdigest()
 
 
 def is_known_device(chipset: str, platform: str) -> bool:
@@ -95,6 +170,11 @@ def merge_known_into_canonical(canonical: dict, known: dict) -> dict:
     This function takes validated known-device data and merges it into
     the canonical structure, filling in gaps and providing baseline values.
     
+    Rules:
+    - Canonical values override known-good values
+    - Known-good values fill missing canonical fields
+    - Must not remove canonical fields
+    
     Args:
         canonical: The canonical JSON structure being built
         known: The known-device data from local or remote repository
@@ -108,6 +188,13 @@ def merge_known_into_canonical(canonical: dict, known: dict) -> dict:
     
     canonical["metadata"]["known_device_source"] = "local"
     canonical["metadata"]["known_device_chipset"] = known.get("chipset", "unknown")
+    
+    # Add hardware_id_hash from known device if not already present
+    if "device" not in canonical:
+        canonical["device"] = {}
+    
+    if not canonical["device"].get("hardware_id_hash") and known.get("hardware_id_hash"):
+        canonical["device"]["hardware_id_hash"] = known["hardware_id_hash"]
     
     # Merge known_good data if present
     if "known_good" in known:
@@ -130,7 +217,7 @@ def merge_known_into_canonical(canonical: dict, known: dict) -> dict:
             if not canonical["windows_nav_card"].get("inf_file_path"):
                 canonical["windows_nav_card"]["inf_file_path"] = known_good["inf"]
     
-    # Merge canonical data if present
+    # Merge canonical data if present (only fill missing fields)
     if "canonical" in known:
         known_canonical = known["canonical"]
         
@@ -166,23 +253,44 @@ def validate_against_known(canonical: dict, known: dict) -> dict:
         known: The known-device data
         
     Returns:
-        Dictionary with validation results
+        Dictionary with validation results including hardware hash match
     """
     validation = {
         "known_device_matched": True,
+        "hardware_hash_match": False,
+        "driver_version_match": None,
+        "missing_fields": [],
         "warnings": [],
         "info": []
     }
+    
+    # Check hardware ID hash match
+    canonical_hash = canonical.get("device", {}).get("hardware_id_hash")
+    known_hash = known.get("hardware_id_hash")
+    
+    if canonical_hash and known_hash:
+        validation["hardware_hash_match"] = (canonical_hash == known_hash)
+        if not validation["hardware_hash_match"]:
+            validation["warnings"].append(
+                f"Hardware ID hash mismatch: expected {known_hash}, found {canonical_hash}"
+            )
+    elif known_hash and not canonical_hash:
+        validation["missing_fields"].append("device.hardware_id_hash")
     
     # Check driver version if known_good specifies it
     if "known_good" in known and known["known_good"].get("driver_version"):
         expected_version = known["known_good"]["driver_version"]
         actual_version = canonical.get("metadata", {}).get("driver_version")
         
-        if actual_version and actual_version != expected_version:
-            validation["warnings"].append(
-                f"Driver version mismatch: expected {expected_version}, found {actual_version}"
-            )
+        if actual_version:
+            validation["driver_version_match"] = (actual_version == expected_version)
+            if actual_version != expected_version:
+                validation["warnings"].append(
+                    f"Driver version mismatch: expected {expected_version}, found {actual_version}"
+                )
+        else:
+            validation["driver_version_match"] = False
+            validation["missing_fields"].append("metadata.driver_version")
     
     # Check firmware if known_good specifies it
     if "known_good" in known and known["known_good"].get("firmware"):

@@ -85,6 +85,51 @@ def remote_is_known_device(chipset: str, platform: str) -> bool:
         return False
 
 
+def fetch_remote_by_hash(hardware_hash: str, platform: str) -> Optional[dict]:
+    """
+    Fetch known-device data from remote by hardware-ID hash.
+    
+    Tries multiple filename patterns:
+    1. <hardware_hash>.json
+    2. Search through manifest for matching hash
+    
+    Args:
+        hardware_hash: The SHA-256 hardware ID hash
+        platform: The platform ('windows' or 'linux')
+        
+    Returns:
+        Dictionary with known-device data, or None if not found
+    """
+    owner, repo, branch = _get_github_config()
+    
+    # Try direct hash-based filename
+    url = (
+        f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/"
+        f"data/known_devices/{platform}/{hardware_hash}.json"
+    )
+    
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            if response.status == 200:
+                data = response.read()
+                device_data = json.loads(data.decode('utf-8'))
+                # Verify the hash matches
+                if device_data.get("hardware_id_hash") == hardware_hash:
+                    return device_data
+    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
+        pass
+    
+    # Fall back to searching through all known devices
+    # Fetch manifest and check each device
+    chipsets = list_remote_known_devices(platform)
+    for chipset in chipsets:
+        device_data = fetch_remote_known_device(chipset, platform)
+        if device_data and device_data.get("hardware_id_hash") == hardware_hash:
+            return device_data
+    
+    return None
+
+
 def fetch_remote_known_device(chipset: str, platform: str) -> Optional[dict]:
     """
     Fetch known-device data from the remote GitHub repository.
@@ -304,7 +349,8 @@ def sync_remote_to_local(platform: Optional[str] = None) -> dict:
     return results
 
 
-def get_known_device_with_fallback(chipset: str, platform: str) -> Optional[dict]:
+def get_known_device_with_fallback(chipset: str, platform: str, 
+                                   hardware_hash: Optional[str] = None) -> Optional[dict]:
     """
     Get known-device data, checking local first, then remote.
     
@@ -312,20 +358,41 @@ def get_known_device_with_fallback(chipset: str, platform: str) -> Optional[dict
     Local repository always takes precedence. If not found locally, checks
     remote and caches the result locally.
     
+    Lookup order:
+    1. hardware_id_hash (if provided) - strongest match
+    2. chipset name
+    3. Remote by hash (if provided)
+    4. Remote by chipset name
+    
     Args:
         chipset: The chipset identifier (e.g., 'mt7927', 'ax210')
         platform: The platform ('windows' or 'linux')
+        hardware_hash: Optional hardware ID hash for strongest matching
         
     Returns:
         Dictionary with known-device data, or None if not found anywhere
     """
-    # Check local first
+    # Try hardware hash first (strongest match)
+    if hardware_hash:
+        data = known_devices.find_by_hardware_hash(hardware_hash, platform)
+        if data:
+            return data
+    
+    # Try chipset name in local
     if known_devices.is_known_device(chipset, platform):
         data = known_devices.load_known_device(chipset, platform)
         if data:
             return data
     
-    # Check remote if not found locally
+    # Try remote by hardware hash
+    if hardware_hash:
+        data = fetch_remote_by_hash(hardware_hash, platform)
+        if data:
+            # Cache locally for future use
+            cache_remote_known_device(chipset, platform, data)
+            return data
+    
+    # Try remote by chipset name
     if remote_is_known_device(chipset, platform):
         data = fetch_remote_known_device(chipset, platform)
         if data:
@@ -597,7 +664,8 @@ def auto_update(platform: Optional[str] = None, verbose: bool = True) -> dict:
     return results
 
 
-def get_known_device_with_auto_update(chipset: str, platform: str) -> Optional[dict]:
+def get_known_device_with_auto_update(chipset: str, platform: str,
+                                      hardware_hash: Optional[str] = None) -> Optional[dict]:
     """
     Get known-device data with automatic update checking.
     
@@ -607,6 +675,7 @@ def get_known_device_with_auto_update(chipset: str, platform: str) -> Optional[d
     Args:
         chipset: The chipset identifier (e.g., 'mt7927', 'ax210')
         platform: The platform ('windows' or 'linux')
+        hardware_hash: Optional hardware ID hash for strongest matching
         
     Returns:
         Dictionary with known-device data, or None if not found anywhere
@@ -617,4 +686,4 @@ def get_known_device_with_auto_update(chipset: str, platform: str) -> Optional[d
         auto_update(platform=platform, verbose=False)
     
     # Now get the device (should be up-to-date)
-    return get_known_device_with_fallback(chipset, platform)
+    return get_known_device_with_fallback(chipset, platform, hardware_hash)

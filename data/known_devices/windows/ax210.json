@@ -1,6 +1,7 @@
 {
   "chipset": "ax210",
   "platform": "windows",
+  "hardware_id_hash": "9ff34b3087da657af8ca575cfb2e9648f0bff92bfbbdd16725e3b2a8a25616ad",
   "known_good": {
     "driver_version": "22.210.0.2",
     "firmware": [

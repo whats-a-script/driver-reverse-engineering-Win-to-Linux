@@ -44,7 +44,43 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from AstraForge.modules import chipset_detector
 from AstraForge.modules import known_devices_remote
+from AstraForge.modules import known_devices
 import normalize_windows as norm_win
+
+
+def extract_hardware_ids_windows(raw_data_path) -> dict:
+    """
+    Extract hardware identifiers from Windows raw data.
+    
+    Returns dict with vendor_id, device_id, subsystem_id, revision
+    """
+    from AstraForge.modules.chipset_detector import _parse_pci_device_json
+    
+    pci_file = raw_data_path / "pci_device.json"
+    vendor_id, device_id, subsystem = _parse_pci_device_json(pci_file)
+    
+    # Try to extract revision if available
+    revision = None
+    if pci_file.exists():
+        import json
+        try:
+            with open(pci_file, 'r') as f:
+                data = json.load(f)
+            # Look for revision in the JSON
+            if isinstance(data, dict):
+                if 'revision' in data:
+                    revision = data['revision']
+                elif 'device' in data and isinstance(data['device'], dict):
+                    revision = data['device'].get('revision')
+        except (json.JSONDecodeError, OSError):
+            pass
+    
+    return {
+        'vendor_id': vendor_id,
+        'device_id': device_id,
+        'subsystem_id': subsystem,
+        'revision': revision
+    }
 
 
 def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
@@ -65,28 +101,85 @@ def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
     print(f"  Reading from: {raw_data_path}")
     print(f"  Detected chipset: {chipset}")
     
+    # Extract hardware IDs
+    hw_ids = extract_hardware_ids_windows(raw_data_path)
+    print(f"  Hardware IDs: VEN={hw_ids['vendor_id']} DEV={hw_ids['device_id']}")
+    
+    # Compute hardware ID hash
+    hardware_hash = known_devices.compute_hardware_id_hash(
+        hw_ids['vendor_id'] or "0000",
+        hw_ids['device_id'] or "0000",
+        hw_ids['subsystem_id'],
+        hw_ids['revision']
+    )
+    print(f"  Hardware ID hash: {hardware_hash[:16]}...")
+    
     # Create base canonical structure
     canonical = create_placeholder_canonical(device_id, "windows", chipset)
+    
+    # Add hardware ID hash to canonical (mandatory field)
+    if 'device' not in canonical:
+        canonical['device'] = {}
+    canonical['device']['hardware_id_hash'] = hardware_hash
     
     # Phase 1: Extract driver data from JSON files
     canonical = norm_win.populate_windows_driver_data(canonical, raw_data_path)
     
-    # Check for known-device data (local first, then remote, with auto-update)
-    print(f"  Checking for known-device data for chipset: {chipset}")
-    known = known_devices_remote.get_known_device_with_auto_update(chipset, "windows")
+    # Check for known-device data (with hardware hash for strongest match)
+    print(f"  Checking for known-device data...")
+    known = known_devices_remote.get_known_device_with_auto_update(chipset, "windows", hardware_hash)
     
     if known:
         print(f"  ✓ Found known-device data for {chipset}")
-        from AstraForge.modules import known_devices
         canonical = known_devices.merge_known_into_canonical(canonical, known)
-        canonical["known_device_validation"] = known_devices.validate_against_known(canonical, known)
+        validation = known_devices.validate_against_known(canonical, known)
+        canonical["known_device_validation"] = validation
+        if validation.get("hardware_hash_match"):
+            print(f"    ✓ Hardware ID hash matches known device")
+        elif validation.get("hardware_hash_match") is False:
+            print(f"    ⚠ Hardware ID hash mismatch (different hardware variant)")
     else:
         print(f"  ℹ No known-device data found for {chipset}")
     
     return canonical
 
 
-def normalize_linux(device_id: str, chipset: str) -> dict:
+def extract_hardware_ids_linux(raw_data_path) -> dict:
+    """
+    Extract hardware identifiers from Linux raw data (lspci).
+    
+    Returns dict with vendor_id, device_id, subsystem_id, revision
+    """
+    from AstraForge.modules.chipset_detector import _parse_lspci
+    
+    lspci_file = raw_data_path / "lspci.txt"
+    vendor_id, device_id, subsystem = _parse_lspci(lspci_file)
+    
+    # Try to extract revision from lspci if available
+    revision = None
+    if lspci_file.exists():
+        try:
+            content = lspci_file.read_text(encoding='utf-8', errors='ignore')
+            # Look for revision line
+            for line in content.splitlines():
+                if 'rev' in line.lower():
+                    import re
+                    match = re.search(r'rev\s+([0-9a-fA-F]{2})', line, re.IGNORECASE)
+                    if match:
+                        revision = match.group(1)
+                        break
+        except OSError:
+            pass
+    
+    return {
+        'vendor_id': vendor_id,
+        'device_id': device_id,
+        'subsystem_id': subsystem,
+        'revision': revision
+    }
+
+
+def normalize_linux(device_id: str, chipset: str, raw_data_path) -> dict:
     """
     Normalize Linux driver data to canonical JSON format.
     
@@ -105,15 +198,37 @@ def normalize_linux(device_id: str, chipset: str) -> dict:
     
     canonical = create_placeholder_canonical(device_id, "linux", chipset)
     
-    # Check for known-device data (local first, then remote, with auto-update)
-    print(f"  Checking for known-device data for chipset: {chipset}")
-    known = known_devices_remote.get_known_device_with_auto_update(chipset, "linux")
+    # Extract hardware IDs if lspci data exists
+    hw_ids = extract_hardware_ids_linux(raw_data_path)
+    
+    # Compute hardware ID hash
+    hardware_hash = known_devices.compute_hardware_id_hash(
+        hw_ids['vendor_id'] or "0000",
+        hw_ids['device_id'] or "0000",
+        hw_ids['subsystem_id'],
+        hw_ids['revision']
+    )
+    
+    # Add hardware ID hash to canonical (mandatory field)
+    if 'device' not in canonical:
+        canonical['device'] = {}
+    canonical['device']['hardware_id_hash'] = hardware_hash
+    
+    print(f"  Hardware ID hash: {hardware_hash[:16]}...")
+    
+    # Check for known-device data (with hardware hash for strongest match)
+    print(f"  Checking for known-device data...")
+    known = known_devices_remote.get_known_device_with_auto_update(chipset, "linux", hardware_hash)
     
     if known:
         print(f"  ✓ Found known-device data for {chipset}")
-        from AstraForge.modules import known_devices
         canonical = known_devices.merge_known_into_canonical(canonical, known)
-        canonical["known_device_validation"] = known_devices.validate_against_known(canonical, known)
+        validation = known_devices.validate_against_known(canonical, known)
+        canonical["known_device_validation"] = validation
+        if validation.get("hardware_hash_match"):
+            print(f"    ✓ Hardware ID hash matches known device")
+        elif validation.get("hardware_hash_match") is False:
+            print(f"    ⚠ Hardware ID hash mismatch (different hardware variant)")
     else:
         print(f"  ℹ No known-device data found for {chipset}")
     
@@ -212,7 +327,7 @@ def main():
     if platform == "windows":
         canonical_data = normalize_windows(device_id, detected_chipset, raw_data_path)
     else:
-        canonical_data = normalize_linux(device_id, detected_chipset)
+        canonical_data = normalize_linux(device_id, detected_chipset, raw_data_path)
     
     # Create output directory if needed
     canonical_path.mkdir(parents=True, exist_ok=True)
