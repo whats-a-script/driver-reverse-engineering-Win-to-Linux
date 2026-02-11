@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "description": "Manifest of known-devices available in this repository",
+  "last_updated": "2026-02-11",
+  "devices": [
+    {
+      "chipset": "mt7927",
+      "platform": "windows",
+      "vendor": "MediaTek",
+      "description": "MediaTek MT7927 WiFi 6E chipset"
+    },
+    {
+      "chipset": "ax210",
+      "platform": "windows",
+      "vendor": "Intel",
+      "description": "Intel AX210 WiFi 6E chipset"
+    }
+  ],
+  "repository": {
+    "owner": "whats-a-script",
+    "repo": "TP-link-wifi-MT7927-reverse-engineer",
+    "branch": "main"
+  }
+}

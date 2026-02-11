@@ -43,6 +43,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from AstraForge.modules import chipset_detector
+from AstraForge.modules import known_devices_remote
 import normalize_windows as norm_win
 
 
@@ -62,12 +63,25 @@ def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
     """
     print(f"Normalizing Windows driver for {device_id}")
     print(f"  Reading from: {raw_data_path}")
+    print(f"  Detected chipset: {chipset}")
     
     # Create base canonical structure
     canonical = create_placeholder_canonical(device_id, "windows", chipset)
     
     # Phase 1: Extract driver data from JSON files
     canonical = norm_win.populate_windows_driver_data(canonical, raw_data_path)
+    
+    # Check for known-device data (local first, then remote)
+    print(f"  Checking for known-device data for chipset: {chipset}")
+    known = known_devices_remote.get_known_device_with_fallback(chipset, "windows")
+    
+    if known:
+        print(f"  ✓ Found known-device data for {chipset}")
+        from AstraForge.modules import known_devices
+        canonical = known_devices.merge_known_into_canonical(canonical, known)
+        canonical["known_device_validation"] = known_devices.validate_against_known(canonical, known)
+    else:
+        print(f"  ℹ No known-device data found for {chipset}")
     
     return canonical
 
@@ -89,7 +103,21 @@ def normalize_linux(device_id: str, chipset: str) -> dict:
     print("  - Parse #define statements for registers")
     print("  - Extract MODULE_DEVICE_TABLE entries")
     
-    return create_placeholder_canonical(device_id, "linux", chipset)
+    canonical = create_placeholder_canonical(device_id, "linux", chipset)
+    
+    # Check for known-device data (local first, then remote)
+    print(f"  Checking for known-device data for chipset: {chipset}")
+    known = known_devices_remote.get_known_device_with_fallback(chipset, "linux")
+    
+    if known:
+        print(f"  ✓ Found known-device data for {chipset}")
+        from AstraForge.modules import known_devices
+        canonical = known_devices.merge_known_into_canonical(canonical, known)
+        canonical["known_device_validation"] = known_devices.validate_against_known(canonical, known)
+    else:
+        print(f"  ℹ No known-device data found for {chipset}")
+    
+    return canonical
 
 
 def create_placeholder_canonical(device_id: str, platform: str, chipset: str) -> dict:

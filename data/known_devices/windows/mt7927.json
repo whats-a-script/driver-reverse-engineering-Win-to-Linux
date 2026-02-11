@@ -1,0 +1,63 @@
+{
+  "chipset": "mt7927",
+  "platform": "windows",
+  "known_good": {
+    "driver_version": "3.0.0.1234",
+    "firmware": [
+      "mt7927_rom_patch.bin",
+      "mt7927_ram_code.bin"
+    ],
+    "inf": "mt7927.inf"
+  },
+  "canonical": {
+    "register_map": [
+      {
+        "address": "0x0000",
+        "name": "CHIP_ID",
+        "description": "Chip identification register",
+        "access": "ro"
+      },
+      {
+        "address": "0x0004",
+        "name": "CHIP_REV",
+        "description": "Chip revision register",
+        "access": "ro"
+      },
+      {
+        "address": "0x1000",
+        "name": "TX_CTRL",
+        "description": "Transmission control register",
+        "access": "rw"
+      },
+      {
+        "address": "0x1004",
+        "name": "RX_CTRL",
+        "description": "Reception control register",
+        "access": "rw"
+      }
+    ],
+    "functions": [
+      {
+        "name": "mt7927_init",
+        "signature": "int mt7927_init(struct device *dev)",
+        "purpose": "Initialize MT7927 device"
+      },
+      {
+        "name": "mt7927_tx",
+        "signature": "int mt7927_tx(struct device *dev, struct sk_buff *skb)",
+        "purpose": "Transmit network packet"
+      },
+      {
+        "name": "mt7927_rx",
+        "signature": "int mt7927_rx(struct device *dev)",
+        "purpose": "Receive network packet"
+      }
+    ]
+  },
+  "metadata": {
+    "description": "MediaTek MT7927 WiFi 6E chipset - known good baseline",
+    "vendor": "MediaTek",
+    "last_updated": "2026-02-11",
+    "validated": true
+  }
+}
