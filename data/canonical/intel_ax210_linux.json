@@ -6,7 +6,7 @@
     "driver_version": "0.0.0.SYNTHETIC",
     "driver_date": "2026-02-11",
     "vendor": "Unknown",
-    "chipset": "intel_ax210",
+    "chipset": "ax210",
     "source_url": null,
     "collection_date": "2026-02-11",
     "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
