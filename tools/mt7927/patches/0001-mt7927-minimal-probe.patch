@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MT7927 Agent <agent@example.com>
+Date: Thu, 12 Feb 2026 04:34:00 +0000
+Subject: [PATCH] mt76: add mt7927 minimal probe skeleton (no firmware load)
+
+Add a guarded probe stub for MT7927 that records PCI IDs and exits without
+loading firmware. Intended as a starting point for safe bring-up.
+
+Signed-off-by: MT7927 Agent <agent@example.com>
+---
+ drivers/net/wireless/mediatek/mt76/mt7927/Makefile |  3 +++
+ drivers/net/wireless/mediatek/mt76/mt7927/pci.c    | 22 ++++++++++++++++++++++
+ 2 files changed, 25 insertions(+)
+
+diff --git a/drivers/net/wireless/mediatek/mt76/mt7927/Makefile b/drivers/net/wireless/mediatek/mt76/mt7927/Makefile
+index 000000000000..111111111111 100644
+--- /dev/null
++++ b/drivers/net/wireless/mediatek/mt76/mt7927/Makefile
+@@ -0,0 +1,3 @@
++# Minimal build scaffold; firmware load intentionally omitted.
++obj-$(CONFIG_MT7927E) += mt7927e.o
++mt7927e-objs := pci.o
+diff --git a/drivers/net/wireless/mediatek/mt76/mt7927/pci.c b/drivers/net/wireless/mediatek/mt76/mt7927/pci.c
+index 000000000000..222222222222 100644
+--- /dev/null
++++ b/drivers/net/wireless/mediatek/mt76/mt7927/pci.c
+@@ -0,0 +1,22 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <linux/module.h>
++#include <linux/pci.h>
++
++#define MT7927_PCI_IDS { PCI_DEVICE(PCI_VENDOR_ID_MEDIATEK, 0x7922) }
++
++static int mt7927_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
++{
++	pr_info("mt7927: minimal probe stub (no firmware load)\n");
++	return 0;
++}
++
++static void mt7927_pci_remove(struct pci_dev *pdev) { }
++
++static const struct pci_device_id mt7927_pci_table[] = {
++	MT7927_PCI_IDS,
++	{ },
++};
++MODULE_DEVICE_TABLE(pci, mt7927_pci_table);
++
++static struct pci_driver mt7927_pci_driver = {
++	.name = "mt7927e-probe-stub",
++	.id_table = mt7927_pci_table,
++	.probe = mt7927_pci_probe,
++	.remove = mt7927_pci_remove,
++};
++
++module_pci_driver(mt7927_pci_driver);
++
++MODULE_AUTHOR("MT7927 Agent");
++MODULE_LICENSE("GPL");
++MODULE_DESCRIPTION("MT7927 minimal probe (no firmware load)");
+-- 
+2.39.2

@@ -29,6 +29,8 @@ build/
 
 # Logs
 *.log
+!tools/mt7927/agent_operations.log
+!tools/mt7927/build_logs/*.log
 
 # Temporary files
 tmp/

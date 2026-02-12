@@ -1,0 +1,5 @@
+Build attempt: mt7927 minimal probe stub
+Timestamp: 2026-02-12T04:52Z
+Host: sandbox (no kernel tree)
+Command: make M=drivers/net/wireless/mediatek/mt76/mt7927
+Result: not run (kernel source/headers not present in repo). Provide patch under tools/mt7927/patches for integration into target kernel tree.
