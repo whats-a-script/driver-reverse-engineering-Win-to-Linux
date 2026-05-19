@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "description": "AstraForge Knowledge Base — Windows/Linux driver reference data",
+  "created": "2026-04-28",
+  "mapping_files": ["mappings/ndis.json", "mappings/kmdf.json"],
+  "devices": ["14c3_7927", "10ec_8125", "10ec_8153"],
+  "notes": "Add new device files to devices/ named {VID}_{DID}.json (lowercase, no 0x prefix). Run: python AstraForge.py kb --search <term> to query."
+}

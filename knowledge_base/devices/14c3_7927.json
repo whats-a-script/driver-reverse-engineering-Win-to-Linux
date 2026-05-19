@@ -1,0 +1,38 @@
+{
+  "vendor_id": "0x14C3",
+  "device_id": "0x7927",
+  "chipset": "MT7927",
+  "description": "MediaTek MT7927 Wi-Fi 7 PCIe Adapter",
+  "family": "mt76",
+  "subsystem": "mac80211",
+  "bus": "pci",
+  "standards": ["802.11a", "802.11b", "802.11g", "802.11n", "802.11ac", "802.11ax", "802.11be"],
+  "bands": ["2.4ghz", "5ghz", "6ghz"],
+  "linux_upstream_driver": null,
+  "linux_upstream_status": "No upstream driver as of 2026. Closest upstream: mt7925e (MT7925).",
+  "similar_linux_drivers": [
+    { "module": "mt7925e", "vid": "0x14C3", "did": "0x7925", "notes": "Nearest upstream, same mt76 family, PCIe" },
+    { "module": "mt7921e", "vid": "0x14C3", "did": "0x7961", "notes": "Older generation, same driver framework" }
+  ],
+  "firmware_files": [
+    "mediatek/WIFI_MT7927_patch_mcu.bin",
+    "mediatek/WIFI_RAM_CODE_MT7927.bin"
+  ],
+  "windows_driver": {
+    "version": "5.3.0.1781",
+    "date": "2024-04-10",
+    "provider": "MediaTek, Inc.",
+    "inf": "oem0.inf"
+  },
+  "register_map": {
+    "_note": "Register offsets not yet reverse-engineered. Reference mt7925 register map as starting point.",
+    "MT7927_REG_CTRL":      "0x0000",
+    "MT7927_REG_STATUS":    "0x0004",
+    "MT7927_REG_INT_MASK":  "0x0008",
+    "MT7927_REG_INT_STAT":  "0x000C",
+    "MT7927_REG_TX_BASE":   "0x0010",
+    "MT7927_REG_RX_BASE":   "0x0014"
+  },
+  "extra_ndis_mappings": {},
+  "notes": "Wi-Fi 7 (802.11be) triband. Windows driver by MediaTek Inc. Uses NDIS 6.x miniport model. Firmware loaded by driver on init. Register layout expected to follow mt7925 conventions."
+}

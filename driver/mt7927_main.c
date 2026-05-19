@@ -58,7 +58,7 @@ static void mt7927_stop(struct ieee80211_hw *hw, bool suspend)
  * TODO: Implement actual TX logic
  */
 static void mt7927_tx(struct ieee80211_hw *hw,
-		      struct ieee80211_tx_control *control,
+		      struct ieee80211_tx_control *control __maybe_unused,
 		      struct sk_buff *skb)
 {
 	struct mt7927_dev *dev = mt7927_hw_dev(hw);
@@ -118,12 +118,12 @@ static void mt7927_remove_interface(struct ieee80211_hw *hw,
  * mac80211 callback: Configure filter
  * TODO: Implement RX filtering
  */
-static void mt7927_configure_filter(struct ieee80211_hw *hw,
-				    unsigned int changed_flags,
-				    unsigned int *total_flags,
-				    u64 multicast)
+static void mt7927_configure_filter(struct ieee80211_hw *hw __maybe_unused,
+				    unsigned int changed_flags __maybe_unused,
+				    unsigned int *total_flags __maybe_unused,
+				    u64 multicast __maybe_unused)
 {
-	struct mt7927_dev *dev = mt7927_hw_dev(hw);
+	struct mt7927_dev *dev __maybe_unused = mt7927_hw_dev(hw);
 
 	/*
 	 * TODO: Configure hardware RX filters based on flags:
@@ -132,20 +132,15 @@ static void mt7927_configure_filter(struct ieee80211_hw *hw,
 	 * - FCS error frames
 	 * - etc.
 	 */
-
-	(void)dev; /* Suppress unused warning */
-	(void)changed_flags;
-	(void)total_flags;
-	(void)multicast;
 }
 
 /*
  * mac80211 callback: Configure device
  * TODO: Implement channel and power configuration
  */
-static int mt7927_config(struct ieee80211_hw *hw, u32 changed)
+static int mt7927_config(struct ieee80211_hw *hw __maybe_unused, u32 changed __maybe_unused)
 {
-	struct mt7927_dev *dev = mt7927_hw_dev(hw);
+	struct mt7927_dev *dev __maybe_unused = mt7927_hw_dev(hw);
 
 	/*
 	 * TODO: Handle configuration changes:
@@ -155,9 +150,6 @@ static int mt7927_config(struct ieee80211_hw *hw, u32 changed)
 	 * - etc.
 	 */
 
-	(void)dev; /* Suppress unused warning */
-	(void)changed;
-
 	return 0;
 }
 
@@ -165,12 +157,12 @@ static int mt7927_config(struct ieee80211_hw *hw, u32 changed)
  * mac80211 callback: BSS info changed
  * TODO: Implement BSS configuration
  */
-static void mt7927_bss_info_changed(struct ieee80211_hw *hw,
-				    struct ieee80211_vif *vif,
-				    struct ieee80211_bss_conf *info,
-				    u64 changed)
+static void mt7927_bss_info_changed(struct ieee80211_hw *hw __maybe_unused,
+				    struct ieee80211_vif *vif __maybe_unused,
+				    struct ieee80211_bss_conf *info __maybe_unused,
+				    u64 changed __maybe_unused)
 {
-	struct mt7927_dev *dev = mt7927_hw_dev(hw);
+	struct mt7927_dev *dev __maybe_unused = mt7927_hw_dev(hw);
 
 	/*
 	 * TODO: Handle BSS info changes:
@@ -179,11 +171,6 @@ static void mt7927_bss_info_changed(struct ieee80211_hw *hw,
 	 * - Association state
 	 * - etc.
 	 */
-
-	(void)dev; /* Suppress unused warning */
-	(void)vif;
-	(void)info;
-	(void)changed;
 }
 
 /*
@@ -222,14 +209,14 @@ int mt7927_register_device(struct mt7927_dev *dev)
 	dev_info(dev->dev, "Registering with mac80211\n");
 
 	/* Allocate mac80211 hardware structure */
-	hw = ieee80211_alloc_hw(sizeof(*dev), &mt7927_ops);
+	hw = ieee80211_alloc_hw(0, &mt7927_ops);
 	if (!hw) {
 		dev_err(dev->dev, "Failed to allocate mac80211 hardware\n");
 		return -ENOMEM;
 	}
 
 	dev->hw = hw;
-	hw->priv = dev;
+	hw->priv = (void *)dev;
 	SET_IEEE80211_DEV(hw, dev->dev);
 
 	/*
@@ -292,7 +279,7 @@ int mt7927_register_device(struct mt7927_dev *dev)
  */
 void mt7927_unregister_device(struct mt7927_dev *dev)
 {
-	if (!dev->hw)
+	if (!dev || !dev->hw)
 		return;
 
 	dev_info(dev->dev, "Unregistering from mac80211\n");
@@ -324,11 +311,12 @@ static int __maybe_unused mt7927_load_firmware(struct mt7927_dev *dev)
 
 	ret = request_firmware(&dev->fw, fw_name, dev->dev);
 	if (ret) {
-		dev_warn(dev->dev, "Firmware %s not found (expected for now): %d\n",
+		dev_warn(dev->dev, "Firmware %s not found (expected during development): %d\n",
 			 fw_name, ret);
 		/*
 		 * For now, continue without firmware since we don't have it yet.
-		 * In a real driver, this would be a fatal error.
+		 * During experimental development, this is not a fatal error.
+		 * In a production driver, this would be a fatal error.
 		 */
 		return 0;
 	}

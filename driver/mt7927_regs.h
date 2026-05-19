@@ -14,6 +14,8 @@
 #ifndef __MT7927_REGS_H
 #define __MT7927_REGS_H
 
+#include <linux/bits.h>
+
 /*
  * Base addresses for register blocks
  * TODO: These need to be discovered through reverse engineering
@@ -25,19 +27,20 @@
 
 /*
  * Chip ID and version registers
- * NOTE: Location unknown - these are guesses
+ * NOTE: Locations unknown - these are sequential placeholders
+ * TODO: Verify against hardware documentation
  */
 #define MT7927_TOP_MISC			0x00000000	/* TODO: Verify */
-#define MT7927_CHIP_ID			0x00000000	/* TODO: Verify */
-#define MT7927_HW_VER			0x00000004	/* TODO: Verify */
-#define MT7927_FW_VER			0x00000008	/* TODO: Verify */
+#define MT7927_CHIP_ID			0x00000004	/* TODO: Verify */
+#define MT7927_HW_VER			0x00000008	/* TODO: Verify */
+#define MT7927_FW_VER			0x0000000C	/* TODO: Verify */
 
 /*
  * Interrupt registers
  * TODO: Actual addresses need to be reverse-engineered
  */
-#define MT7927_INT_STATUS		0x00000000	/* TODO: Verify */
-#define MT7927_INT_MASK			0x00000004	/* TODO: Verify */
+#define MT7927_INT_STATUS		0x00000010	/* TODO: Verify */
+#define MT7927_INT_MASK			0x00000014	/* TODO: Verify */
 
 /* Interrupt bits - TODO: Verify these exist and their bit positions */
 #define MT7927_INT_TX_DONE		BIT(0)		/* TX completion */
@@ -49,58 +52,58 @@
  * DMA engine registers (WFDMA)
  * TODO: Need to discover actual register layout
  */
-#define MT7927_WFDMA_GLO_CFG		0x00000000	/* TODO: Verify */
-#define MT7927_WFDMA_RST		0x00000004	/* TODO: Verify */
+#define MT7927_WFDMA_GLO_CFG		0x00000018	/* TODO: Verify */
+#define MT7927_WFDMA_RST		0x0000001C	/* TODO: Verify */
 
 /*
  * TX queue registers
  * TODO: Discover actual TX queue control registers
  */
-#define MT7927_TX_RING_BASE(n)		(0x00000000 + (n) * 0x10)  /* TODO: Verify */
-#define MT7927_TX_RING_CNT(n)		(0x00000004 + (n) * 0x10)  /* TODO: Verify */
-#define MT7927_TX_RING_CIDX(n)		(0x00000008 + (n) * 0x10)  /* TODO: Verify */
-#define MT7927_TX_RING_DIDX(n)		(0x0000000C + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_TX_RING_BASE(n)		(0x00000020 + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_TX_RING_CNT(n)		(0x00000024 + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_TX_RING_CIDX(n)		(0x00000028 + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_TX_RING_DIDX(n)		(0x0000002C + (n) * 0x10)  /* TODO: Verify */
 
 /*
  * RX queue registers
  * TODO: Discover actual RX queue control registers
  */
-#define MT7927_RX_RING_BASE(n)		(0x00000000 + (n) * 0x10)  /* TODO: Verify */
-#define MT7927_RX_RING_CNT(n)		(0x00000004 + (n) * 0x10)  /* TODO: Verify */
-#define MT7927_RX_RING_CIDX(n)		(0x00000008 + (n) * 0x10)  /* TODO: Verify */
-#define MT7927_RX_RING_DIDX(n)		(0x0000000C + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_RX_RING_BASE(n)		(0x00000080 + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_RX_RING_CNT(n)		(0x00000084 + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_RX_RING_CIDX(n)		(0x00000088 + (n) * 0x10)  /* TODO: Verify */
+#define MT7927_RX_RING_DIDX(n)		(0x0000008C + (n) * 0x10)  /* TODO: Verify */
 
 /*
  * MCU communication registers
  * TODO: Discover MCU mailbox/command interface
  */
-#define MT7927_MCU_CMD			0x00000000	/* TODO: Verify */
-#define MT7927_MCU_STATUS		0x00000004	/* TODO: Verify */
+#define MT7927_MCU_CMD			0x000000A0	/* TODO: Verify */
+#define MT7927_MCU_STATUS		0x000000A4	/* TODO: Verify */
 
 /*
  * MAC configuration registers
  * TODO: Discover MAC layer register layout
  */
-#define MT7927_MAC_ADDR_0		0x00000000	/* TODO: Verify */
-#define MT7927_MAC_ADDR_1		0x00000004	/* TODO: Verify */
+#define MT7927_MAC_ADDR_0		0x000000A8	/* TODO: Verify */
+#define MT7927_MAC_ADDR_1		0x000000AC	/* TODO: Verify */
 
 /*
  * PHY configuration registers
  * TODO: Discover PHY configuration interface
  */
-#define MT7927_PHY_CTRL			0x00000000	/* TODO: Verify */
+#define MT7927_PHY_CTRL			0x000000B0	/* TODO: Verify */
 
 /*
  * Power management registers
  * TODO: Discover power management interface
  */
-#define MT7927_PM_CTRL			0x00000000	/* TODO: Verify */
+#define MT7927_PM_CTRL			0x000000B4	/* TODO: Verify */
 
 /*
  * Firmware loading
  * TODO: Discover firmware download protocol and registers
  */
-#define MT7927_FW_DL_ADDR		0x00000000	/* TODO: Verify */
-#define MT7927_FW_DL_CTRL		0x00000004	/* TODO: Verify */
+#define MT7927_FW_DL_ADDR		0x000000B8	/* TODO: Verify */
+#define MT7927_FW_DL_CTRL		0x000000BC	/* TODO: Verify */
 
 #endif /* __MT7927_REGS_H */

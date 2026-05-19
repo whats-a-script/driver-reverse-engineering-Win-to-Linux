@@ -1,0 +1,9 @@
+﻿EB36156D5A552600FF122703323B86712D4630EE7934CC573A7CEB04E123F519  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\computerinfo.json
+9384B84BFC8A7F32CE72569912CA85394CBEE190AFEFD42CDC4F80499C2F9EFA  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\driver_files.json
+E0C833A060D3A9F0A8E455D4F24763BCA8F5E21ED73DC701CAE037AFB255C259  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\driver_package.json
+FD0E538128BABA92825FC5D92F803FB23A25FC27E04D9C8E9862F8A0CC32DF15  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\netsh_wlan_drivers.txt
+3C07DBD335AB488F3F9FE46DD9CBA7D97F5BC48A953A9F28B3949D42D20D3D07  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\pci_device.json
+0B7ADC3516ED74706B2E8E2BE639E98D13391FC4D7D28756FDDF3B20299FE582  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\pnputil_devices.txt
+  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\pulled_files_checksums.txt
+E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\registry.json
+B2DEB1F75B3A86CB02F22801DE1914652FABB79F71D54FE6C15798F1D601DC79  C:\Users\Tron\OneDrive\Documents\GitHub\linuxwifi7\TP-link-wifi-MT7927-reverse-engineer\pulled drivers\mt7927\systeminfo.txt

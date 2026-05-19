@@ -32,25 +32,16 @@ MODULE_DEVICE_TABLE(pci, mt7927_pci_id_table);
  * Interrupt handler
  * TODO: Implement proper interrupt handling once register layout is known
  */
-static irqreturn_t mt7927_interrupt_handler(int irq, void *dev_id)
+static irqreturn_t mt7927_interrupt_handler(int irq __maybe_unused, void *dev_id __maybe_unused)
 {
-	struct mt7927_dev *dev = dev_id;
-	u32 status;
-
-	/* TODO: Read actual interrupt status register */
-	/* status = mt7927_rr(dev, MT7927_INT_STATUS); */
-	(void)dev; /* Suppress unused warning */
-
 	/*
-	 * For now, just acknowledge we got an interrupt.
-	 * Real implementation needs to:
+	 * TODO: Implement interrupt handling:
 	 * - Read interrupt status
 	 * - Handle TX completion
 	 * - Handle RX packets
 	 * - Handle MCU events
 	 * - Clear interrupt status
 	 */
-	status = 0; /* Placeholder */
 
 	return IRQ_HANDLED;
 }

@@ -1,0 +1,7 @@
+﻿{
+    "exported_at":  "2026-02-11T21:16:20.0147941-08:00",
+    "notes":  "Firmware binaries may be present locally; not committed. See pulled_files_checksums.txt for hashes.",
+    "legal_note":  "Vendor EULA may restrict redistribution. Do not commit firmware binaries.",
+    "source":  "desktop_export",
+    "local_path":  "C:\\Users\\Tron\\OneDrive\\Documents\\GitHub\\linuxwifi7\\TP-link-wifi-MT7927-reverse-engineer\\pulled drivers\\mt7927"
+}

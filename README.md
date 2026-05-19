@@ -1,232 +1,257 @@
-# MediaTek MT7927 (Filogic 380) Linux Driver - Experimental
+# AstraForge —  Windows-to-Linux Driver Reverse Engineering Toolkit
 
-## ⚠️ WARNING - EXPERIMENTAL DRIVER ⚠️
+> **Copyright (C) 2026 (Charles Ellison). All intellectual property rights reserved.**
+> All proprietary rights in this software, its source code, tooling, methodology, and documentation are reserved by the author. No license, express or implied, is granted except as explicitly stated herein.
 
-This is an **EXPERIMENTAL**, **REVERSE-ENGINEERED** driver for the MediaTek MT7927 (Filogic 380) Wi-Fi 7 PCIe chipset. 
+---
 
-**THIS DRIVER IS NOT READY FOR PRODUCTION USE.**
+## LEGAL NOTICE
+
+**ALL RIGHTS RESERVED.** This repository, including but not limited to its source code, documentation, tooling (AstraForge), analysis methodologies, generated outputs, and all derivative works, is the exclusive proprietary and intellectual property of linuxwifi7 (Charles Ellison).
+
+- Reproduction, redistribution, sublicensing, or commercial use of any portion of this repository without express written permission from the author is strictly prohibited.
+- No patent rights, trademark rights, or other intellectual property rights are granted by implication, estoppel, or otherwise.
+- Viewing this repository on a public platform does not constitute a grant of any rights to copy, modify, or distribute its contents.
+
+**NO LIABILITY ASSUMED.** This software is provided strictly for educational, research purposes, self repair. The author assumes no liability whatsoever for any direct, indirect, incidental, special, exemplary, or consequential damages (including but not limited to hardware damage, data loss, system instability, or financial loss) arising from the use, misuse, or inability to use this software, even if the author has been advised of the possibility of such damages. **Use entirely at your own risk.**
+
+---
+
+## WARNING — EXPERIMENTAL
+
+This is an **EXPERIMENTAL**, **INCOMPLETE**, reverse-engineered driver skeleton for windows to linux drivers.
+
 
 - Hardware functionality is **NOT IMPLEMENTED**
-- Register addresses are **UNKNOWN** and need reverse engineering
+- Register addresses are **UNKNOWN** placeholders requiring further reverse engineering
 - Firmware protocol is **UNKNOWN**
-- May not work at all or could **DAMAGE HARDWARE**
-- No official support from MediaTek
-- Use entirely at your own risk
+- Loading on real hardware is **NOT RECOMMENDED**
+- No official support from MediaTek or TP-Link
+
+---
 
 ## Overview
-
-The MediaTek MT7927 (Filogic 380) is a Wi-Fi 7 (802.11be) PCIe chipset found in some TP-Link wireless adapters. No official Linux driver exists for this hardware. This project is an educational attempt to create an open-source driver through reverse engineering.
+The "test" driver below.
+The MediaTek MT7927 (Filogic 380) is a Wi-Fi 7 (802.11be) PCIe chipset found in TP-Link wireless adapters. No official Linux driver exists. This project is an educational research effort to develop an driver through reverse engineering, powered by the **AstraForge** analysis toolkit developed in-house.
 
 ### Hardware Details
 
-- **Chipset**: MediaTek Filogic 380 (MT7927)
-- **PCI Vendor ID**: 0x14C3 (MediaTek)
-- **PCI Device ID**: 0x7927
-- **Interface**: PCIe (Gen 3 assumed)
-- **Wi-Fi Standards**: 802.11be (Wi-Fi 7), backward compatible with 802.11ax/ac/n/a/g/b
-- **Bands**: 2.4 GHz, 5 GHz, 6 GHz (tri-band)
-- **Known Devices**: TP-Link Archer TXE70E, possibly others
+| Property | Value |
+|---|---|
+| Chipset | MediaTek Filogic 380 (MT7927) |
+| PCI Vendor ID | 0x14C3 (MediaTek) |
+| PCI Device ID | 0x7927 |
+| Interface | PCIe Gen 3 |
+| Wi-Fi Standards | 802.11be (Wi-Fi 7), backward compatible 802.11ax/ac/n/a/g/b |
+| Bands | 2.4 GHz, 5 GHz, 6 GHz (tri-band) |
+| Known Devices | TP-Link Archer TXE70E |
+
+---
+
+## AstraForge Toolkit
+
+AstraForge is a proprietary reverse engineering toolkit developed for this project. It analyzes Windows driver binaries and generates Linux kernel driver skeletons.
+
+### Features
+- Windows INF and PE binary analysis
+- PCI/USB device ID extraction
+- Canonical JSON driver representation
+- Linux kernel module skeleton generation
+- GUI (AstraForge.exe) and CLI (AstraForgeCLI.exe) interfaces
+- Knowledge base for discovered driver patterns
+
+### Downloads (v1.0)
+
+Pre-built Windows executables are located in `dist/`:
+
+| Executable | Description |
+|---|---|
+| `AstraForge.exe` | GUI application (no Python required) |
+| `AstraForgeCLI.exe` | Command-line interface (no Python required) |
+
+To rebuild from source:
+```powershell
+.\tools\AstraForge\build.ps1
+```
+
+To produce a Windows installer, open `tools/AstraForge/installer.iss` in [Inno Setup Compiler](https://jrsoftware.org/isinfo.php) and build.
+
+**AstraForge is proprietary software. All rights reserved. No redistribution permitted without express written consent.**
+
+---
 
 ## Project Status
 
-### ✅ Completed
-- [x] Basic repository structure
-- [x] Linux kernel driver skeleton
+### Completed
+- [x] Repository structure and documentation
+- [x] AstraForge v1.0 (GUI + CLI) — Windows EXE build
+- [x] Linux kernel driver skeleton (mt7927.ko)
 - [x] PCI device detection and binding
 - [x] PCIe resource allocation (BARs, DMA, interrupts)
 - [x] mac80211 framework integration (stub)
 - [x] Kconfig and Makefile for out-of-tree build
-- [x] Code compiles successfully
+- [x] Successful kernel module compilation
 
-### ⏳ In Progress / TODO
-- [ ] Reverse engineer register map from Windows driver
+### In Progress / TODO
+- [ ] Reverse engineer register map from Windows driver binaries
 - [ ] Determine firmware format and loading protocol
-- [ ] Implement MAC layer initialization
-- [ ] Implement PHY layer initialization
-- [ ] Implement DMA ring setup and management
-- [ ] Implement interrupt handling
-- [ ] Implement TX/RX packet processing
+- [ ] MAC layer initialization
+- [ ] PHY layer initialization
+- [ ] DMA ring setup and management
+- [ ] Interrupt handling
+- [ ] TX/RX packet processing
 - [ ] Channel switching and frequency control
 - [ ] Power management
 - [ ] Hardware encryption/decryption
-- [ ] Real-world testing with hardware
+- [ ] Real-world hardware testing
 
-### ❌ Known Limitations
+### Known Limitations
 - Driver does **NOT** initialize hardware
 - Driver does **NOT** load firmware
 - Driver does **NOT** transmit or receive packets
 - All register addresses are **PLACEHOLDERS**
-- Hardware may not respond correctly
-- No regulatory domain support yet
+- No regulatory domain support
 - No calibration data handling
+
+---
 
 ## Building the Driver
 
 ### Prerequisites
 
 ```bash
-# Install kernel headers for your running kernel
-sudo apt-get install linux-headers-$(uname -r)  # Ubuntu/Debian
-sudo yum install kernel-devel                    # RHEL/CentOS
-sudo pacman -S linux-headers                     # Arch Linux
+# Ubuntu/Debian
+sudo apt-get install linux-headers-$(uname -r)
+
+# RHEL/CentOS
+sudo yum install kernel-devel
+
+# Arch Linux
+sudo pacman -S linux-headers
 ```
 
-### Build Steps
+### Build
 
 ```bash
 cd driver
 make
 ```
 
-This will produce `mt7927.ko` kernel module.
+Produces `mt7927.ko`.
 
-### Installation (NOT RECOMMENDED)
+### Loading (NOT RECOMMENDED on real hardware)
 
 ```bash
-# Load the module
 sudo insmod mt7927.ko
-
-# Check if device was detected
 dmesg | tail -30
-
-# Unload the module
 sudo rmmod mt7927
 ```
 
-**WARNING**: Loading this driver on real hardware is NOT RECOMMENDED. It will bind to the device but will not make it functional and could potentially cause issues.
+---
 
-## Architecture
-
-The driver is modeled after the upstream `mt76` driver family for other MediaTek chips:
+## Repository Structure
 
 ```
-driver/
-├── Kconfig              # Kernel configuration options
-├── Makefile             # Build system
-├── mt7927.h             # Main header with device structures
-├── mt7927_regs.h        # Register definitions (mostly TODO)
-├── mt7927_main.c        # mac80211 integration and lifecycle
-└── mt7927_pci.c         # PCIe probe/remove and hardware init
+.
+├── dist/                        # Pre-built AstraForge executables (v1.0)
+│   ├── AstraForge.exe           # GUI
+│   └── AstraForgeCLI.exe        # CLI
+├── tools/
+│   └── AstraForge/              # AstraForge source and build config
+│       ├── AstraForge.py        # Core logic / CLI entry point
+│       ├── AstraForgeGUI.py     # GUI entry point
+│       ├── config.py            # Configuration management
+│       ├── AstraForgeGUI.spec   # PyInstaller GUI spec
+│       ├── AstraForgeCLI.spec   # PyInstaller CLI spec
+│       ├── build.ps1            # One-command build script
+│       └── installer.iss        # Inno Setup installer script
+├── driver/                      # Linux kernel driver source
+│   ├── Kconfig
+│   ├── Makefile
+│   ├── mt7927.h
+│   ├── mt7927_regs.h            # Register definitions (placeholders)
+│   ├── mt7927_main.c            # mac80211 integration
+│   └── mt7927_pci.c             # PCIe probe/remove
+├── knowledge_base/              # Discovered device patterns
+├── reports/                     # Analysis outputs
+├── pulled drivers/              # Raw Windows/Linux driver files
+└── docs/
+    ├── QUICKSTART.md
+    ├── REVERSE_ENGINEERING.md
+    ├── TESTING.md
+    └── CONTRIBUTING.md
 ```
 
-### Key Components
+---
 
-1. **PCI Layer** (`mt7927_pci.c`)
-   - Device detection and binding
-   - PCIe resource management
-   - Interrupt registration
-   - Hardware reset and initialization
+## Reverse Engineering Methodology
 
-2. **MAC80211 Integration** (`mt7927_main.c`)
-   - Wireless stack interface
-   - TX/RX callbacks (stubs)
-   - Configuration and state management
+See [docs/REVERSE_ENGINEERING.md](docs/REVERSE_ENGINEERING.md) for full details.
 
-3. **Register Definitions** (`mt7927_regs.h`)
-   - Hardware register addresses
-   - **WARNING**: Most addresses are UNKNOWN placeholders
-
-## Reverse Engineering Notes
-
-See [REVERSE_ENGINEERING.md](docs/REVERSE_ENGINEERING.md) for detailed notes on reverse engineering process, findings, and methodologies.
-
-### What We Know
-- PCI Vendor/Device ID: 14C3:7927
-- Device uses PCIe interface
-- Likely uses similar architecture to MT7921/MT7922
+### Known
+- PCI Vendor/Device ID: `14C3:7927`
+- PCIe interface confirmed
+- Likely shares architecture with MT7921/MT7922 family
 - Supports Wi-Fi 7 (802.11be)
 
-### What We Don't Know (Yet)
-- Exact register memory map
+### Unknown (Actively Researching)
+- Register memory map
 - Firmware format and loading protocol
 - DMA descriptor format
-- Interrupt bit meanings
+- Interrupt bit assignments
 - MAC/PHY initialization sequence
 - Calibration data format
 - Power management registers
 
-## Contributing
-
-This is an open reverse engineering project. Contributions are welcome!
-
-### How to Help
-
-1. **Hardware Analysis**
-   - Dump PCI configuration space
-   - Capture PCIe traffic with Windows driver
-   - Analyze register access patterns
-
-2. **Firmware Analysis**
-   - Extract Windows driver firmware
-   - Analyze firmware format
-   - Document firmware commands
-
-3. **Driver Development**
-   - Implement TODOs in code
-   - Add functionality as hardware behavior is discovered
-   - Write tests and validation code
-
-4. **Documentation**
-   - Document findings
-   - Create guides for reverse engineering process
-   - Explain hardware behavior
-
-### Code Style
-
-- Follow Linux kernel coding style
-- Use `scripts/checkpatch.pl` from kernel tree
-- Add comments explaining unknowns
-- Mark speculative code with TODO/FIXME
+---
 
 ## Legal and Ethical Considerations
 
+### Intellectual Property
+
+All original work in this repository — including the AstraForge toolkit, analysis methodology, generated driver skeletons, and documentation — is the proprietary intellectual property of linuxwifi7 (Charlie Ellison). **All intellectual property rights are reserved.**
+
+The Linux kernel driver skeleton (`driver/`) is derived from original work and is offered under GPL-2.0-only solely for the purpose of kernel linkage compliance. This GPL grant does not extend to the AstraForge toolkit or any other component of this repository.
+
+No proprietary code, firmware, or binary assets from MediaTek or TP-Link are included in this repository. The driver is a clean-room implementation based on hardware observation only.
+
+### No Warranty / No Liability
+
+THIS SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY — WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE — ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE. **ALL RISK IS ASSUMED BY THE USER.**
+
 ### Legality
-- Reverse engineering for interoperability is generally legal in most jurisdictions
-- No proprietary code from MediaTek or TP-Link is included
-- Driver is clean-room implementation based on hardware observation
-- Firmware remains proprietary and is not included
-
-### Ethics
-- Goal is interoperability, not circumventing security
-- Driver will not implement DRM or copy protection bypasses
-- Findings may be shared with MediaTek for potential official support
-
-## Resources
-
-### Similar Drivers (Reference)
-- [mt76](https://github.com/torvalds/linux/tree/master/drivers/net/wireless/mediatek/mt76) - Upstream MediaTek driver family
-- [mt7921](https://github.com/torvalds/linux/tree/master/drivers/net/wireless/mediatek/mt76/mt7921) - Similar PCIe Wi-Fi 6E chip
-
-### Tools
-- `lspci` - List PCI devices
-- `setpci` - Read/write PCI config space
-- `pcileech` - PCIe DMA analysis
-- Ghidra/IDA Pro - Binary analysis
-- Wireshark - Packet capture
-
-### Documentation
-- [Linux Wireless](https://wireless.wiki.kernel.org/) - mac80211 documentation
-- [PCI Express](https://pcisig.com/) - PCIe specifications
-- [IEEE 802.11](https://www.ieee802.org/11/) - Wi-Fi standards
-
-## License
-
-This driver is licensed under GPL-2.0-only to match Linux kernel licensing requirements.
-
-## Disclaimer
-
-THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. THE AUTHORS TAKE NO RESPONSIBILITY FOR ANY DAMAGE TO HARDWARE OR DATA THAT MAY RESULT FROM USE OF THIS SOFTWARE.
-
-Use of this driver is entirely at your own risk. The driver is experimental and incomplete. It may cause system instability, hardware malfunction, or data loss.
-
-## Contact
-
-Project Repository: https://github.com/whats-a-script/TP-link-wifi-MT7927-reverse-engineer
-
-For questions or to contribute, please open an issue or pull request on GitHub.
+- Reverse engineering for interoperability purposes is generally lawful in most jurisdictions under fair use, interoperability exceptions (e.g., EU Directive 2009/24/EC, 17 U.S.C. § 1201(f)).
+- No proprietary MediaTek or TP-Link code is reproduced herein.
+- Firmware is not included and remains proprietary to its respective owners.
 
 ---
 
-**Last Updated**: January 2024  
-**Driver Version**: 0.0.1-experimental  
-**Kernel Compatibility**: Linux 5.15+
+## Reference Resources
+
+### Related Drivers
+- [mt76](https://github.com/torvalds/linux/tree/master/drivers/net/wireless/mediatek/mt76) — upstream MediaTek driver family
+- [mt7921](https://github.com/torvalds/linux/tree/master/drivers/net/wireless/mediatek/mt76/mt7921) — similar PCIe Wi-Fi 6E chip
+
+### Tools
+- `lspci` / `setpci` — PCI configuration inspection
+- Ghidra / IDA Pro — binary analysis
+- Wireshark — packet capture
+- pcileech — PCIe DMA analysis
+
+### Standards
+- [Linux Wireless (mac80211)](https://wireless.wiki.kernel.org/)
+- [IEEE 802.11be](https://www.ieee802.org/11/)
+- [PCIe Specification](https://pcisig.com/)
+
+---
+
+## Contact
+
+Project Repository: https://github.com/linuxwifi7/TP-link-wifi-MT7927-reverse-engineer
+
+For questions, please open an issue on GitHub.
+
+---
+
+**Copyright (C) 2026 AstraForge (Charlie Ellison). All Rights Reserved.**
+**Last Updated**: April 2026 | **AstraForge Version**: 1.0 | **Driver Version**: 0.0.1-experimental | **Kernel Compatibility**: Linux 5.15+

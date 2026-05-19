@@ -1,0 +1,22 @@
+{
+  "vendor_id": "0x0BDA",
+  "device_id": "0x8153",
+  "chipset": "RTL8153",
+  "description": "Realtek USB GbE Family Controller",
+  "family": "r8152",
+  "subsystem": "usbnet",
+  "bus": "usb",
+  "linux_upstream_driver": "r8152",
+  "linux_upstream_status": "Upstream. drivers/net/usb/r8152.c",
+  "similar_linux_drivers": [
+    { "module": "r8152", "notes": "Full upstream implementation — best reference" }
+  ],
+  "firmware_files": ["rtl_nic/rtl8153a-4.fw", "rtl_nic/rtl8153b-2.fw"],
+  "register_map": {
+    "RTL8153_REG_USB_PHY":  "0xB000",
+    "RTL8153_REG_PLA_IDR":  "0xC000",
+    "RTL8153_REG_PLA_RCR":  "0xC010",
+    "RTL8153_REG_PLA_TCR0": "0xC018"
+  },
+  "notes": "USB CDC-NCM compatible. r8152 driver handles vendor-specific init. Study drivers/net/usb/r8152.c."
+}

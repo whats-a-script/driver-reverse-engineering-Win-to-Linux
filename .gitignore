@@ -22,3 +22,19 @@ Module.symvers
 
 # Logs
 *.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated / pulled data
+pulled drivers/
+output/
+
+# Build artifacts and distribution binaries
+build/
+dist/
+
+# Claude Code local settings
+.claude/

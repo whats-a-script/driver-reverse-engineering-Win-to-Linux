@@ -1,0 +1,17 @@
+{
+  "vendor_id": null,
+  "device_id": null,
+  "chipset": "NvVAD",
+  "description": null,
+  "class": null,
+  "bus": "pci",
+  "version": null,
+  "provider": null,
+  "firmware_files": [],
+  "registry_keys": [],
+  "linux_upstream_driver": null,
+  "linux_upstream_status": "Unknown \u2014 reverse engineering in progress",
+  "similar_linux_drivers": [],
+  "register_map": {},
+  "notes": ""
+}

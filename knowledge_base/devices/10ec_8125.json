@@ -1,0 +1,25 @@
+{
+  "vendor_id": "0x10EC",
+  "device_id": "0x8125",
+  "chipset": "RTL8125",
+  "description": "Realtek PCIe 2.5GbE Family Controller",
+  "family": "r8169",
+  "subsystem": "net_device",
+  "bus": "pci",
+  "linux_upstream_driver": "r8169",
+  "linux_upstream_status": "Upstream since kernel 5.9 (r8169 driver covers RTL8125).",
+  "similar_linux_drivers": [
+    { "module": "r8169", "notes": "Upstream driver — full reference implementation available" }
+  ],
+  "firmware_files": ["rtl_nic/rtl8125a-3.fw", "rtl_nic/rtl8125b-2.fw"],
+  "register_map": {
+    "RTL8125_REG_PHYAR":   "0x0060",
+    "RTL8125_REG_PHYSTATUS":"0x006C",
+    "RTL8125_REG_RMS":     "0x00DA",
+    "RTL8125_REG_CPCR":    "0x00E0",
+    "RTL8125_REG_RDSAR":   "0x00E4",
+    "RTL8125_REG_TNPDS":   "0x0020",
+    "RTL8125_REG_CMD":     "0x0037"
+  },
+  "notes": "r8169 upstream source is the best reference. Study drivers/net/ethernet/realtek/r8169_main.c for register usage patterns applicable to RTL8125."
+}

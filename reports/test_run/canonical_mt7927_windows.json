@@ -1,0 +1,51 @@
+{
+  "device": {
+    "name": "mt7927",
+    "description": "TP-Link Wi-Fi 7 PCIe Adapter",
+    "class": "Net",
+    "bus": "pci",
+    "vendor_id": "0x14C3",
+    "device_id": "0x7927",
+    "subsystem_id": "0xE104105B",
+    "revision": "0x00"
+  },
+  "driver": {
+    "version": "5.3.0.1781",
+    "date": "20240410000000.******+***",
+    "provider": "MediaTek, Inc.",
+    "files": [
+      "oem0.inf",
+      "oem89.inf"
+    ],
+    "firmware": [],
+    "capabilities": {
+      "bands": [
+        "2.4ghz",
+        "5ghz",
+        "6ghz"
+      ],
+      "modes": [
+        "802.11a",
+        "802.11ac",
+        "802.11ax",
+        "802.11b",
+        "802.11be",
+        "802.11g",
+        "802.11n"
+      ],
+      "features": [
+        "wifi6",
+        "wifi7"
+      ]
+    }
+  },
+  "system": {
+    "os": "windows",
+    "kernel_or_build": "10.0.26200 N/A Build 26200",
+    "architecture": "x64-based PC",
+    "notes": [
+      "OS Name:                       Microsoft Windows 11 Pro",
+      "OS Version:                    10.0.26200 N/A Build 26200"
+    ]
+  }
+}

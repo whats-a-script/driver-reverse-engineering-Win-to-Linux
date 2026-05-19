@@ -1,0 +1,9 @@
+{
+  "windows_raw": "C:\\ProgramData\\NVIDIA Corporation\\NVIDIA App\\UpdateFramework\\ota-artifacts\\nvapp\\post-processing\\241407d0d505673fd4d654200345ed76\\NvVAD",
+  "windows_out": "C:\\Users\\Tron\\OneDrive\\Documents\\GitHub\\linuxwifi7\\TP-link-wifi-MT7927-reverse-engineer\\pulled drivers\\windows driver\\normalized output",
+  "linux_raw": "C:\\Users\\Tron\\OneDrive\\Documents\\GitHub\\linuxwifi7\\TP-link-wifi-MT7927-reverse-engineer\\pulled drivers\\Linux drivers\\mt7927",
+  "linux_out": "C:\\Users\\Tron\\OneDrive\\Documents\\GitHub\\linuxwifi7\\TP-link-wifi-MT7927-reverse-engineer\\pulled drivers\\Linux drivers\\normalized output",
+  "diff_out": "C:\\Users\\Tron\\OneDrive\\Documents\\GitHub\\linuxwifi7\\TP-link-wifi-MT7927-reverse-engineer\\pulled drivers\\windows driver\\diff results",
+  "driver_out": "C:/Temp/plugins/Driver Files/Test output",
+  "theme": "Dark (Default)"
+}
