@@ -1,4 +1,4 @@
-# Agent Instructions: MT7927 Cross-Platform Driver Analysis Pipeline
+# MT7927 Cross-Platform Driver Analysis Pipeline
 
 ## Overview
 
