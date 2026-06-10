@@ -1,0 +1,18 @@
+[
+  {
+    "source": "Debian non-free-firmware",
+    "url": "https://deb.debian.org/debian/pool/non-free-firmware/f/firmware-nonfree/firmware-mediatek_20260110-1_all.deb",
+    "filename": "firmware-mediatek_20260110-1_all.deb",
+    "content_length_bytes": 22478228,
+    "sha256": "26a05d9384ef50c6272085266466c25de565a8ec701507c9426c339a4a751d99",
+    "retrieved_at": "2026-02-12T04:51:29Z",
+    "license_note": "Debian non-free-firmware; binaries kept local only, not committed or redistributed.",
+    "local_path": "/tmp/firmware-mediatek_20260110-1_all.deb",
+    "status": "downloaded-for-analysis-not-committed",
+    "headers": {
+      "Content-Type": "application/vnd.debian.binary-package",
+      "Last-Modified": "Wed, 04 Feb 2026 20:48:18 GMT",
+      "Content-Length": "22478228"
+    }
+  }
+]

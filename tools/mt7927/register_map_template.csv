@@ -1,0 +1,6 @@
+address,name,access,description,evidence_source,evidence_note,last_seen_timestamp
+0x0000,CHIP_ID,ro,"SoC/ASIC ID register","mmio_dump","value stable across cold boot",
+0x0004,RESET_CTRL,rw,"Reset control bits (bit0: MAC reset)","datasheet|reverse","gate writes via --unsafe",
+0x0010,INT_STATUS,ro,"Interrupt status summary","driver_trace","",
+0x0014,INT_MASK,rw,"Interrupt mask bits","driver_trace","set mask before enabling interrupts",
+0x0020,DMA_GLOBAL_CFG,rw,"DMA global configuration","dma_probe","",

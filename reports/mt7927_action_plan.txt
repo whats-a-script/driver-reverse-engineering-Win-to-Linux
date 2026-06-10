@@ -1,0 +1,32 @@
+MT7927 Linux Port Action Plan (2026-02-12T04:52Z)
+-------------------------------------------------
+
+Discovery & Legal Triage
+[x] Identify candidate Windows/Linux firmware sources (Debian non-free-firmware package noted; binaries kept local only)
+[ ] Collect Windows INF/SYS/CAT package metadata and EULA text
+
+Static Analysis
+[ ] Extract strings/symbols/IOCTLs from Windows SYS/PDB (pending input)
+[ ] List firmware filenames referenced by Windows driver
+
+Dynamic Observation (Read-only)
+[x] Provide BAR sweep and MMIO dump tools (safe by default, --unsafe gate for /dev/mem)
+[ ] Capture live BAR/MMIO traces on hardware (pending hardware access)
+
+Behavior Mapping
+[x] Draft Windows→Linux routine mapping (reports/windows_to_linux_mapping.md)
+[ ] Validate mapping against real traces and INF behaviors
+
+Linux Scaffolding
+[x] Minimal probe patch stub (no firmware load) under tools/mt7927/patches
+[ ] Build against target kernel and capture logs (needs kernel headers/tree)
+
+Firmware Loader & DMA
+[x] Firmware loader pseudocode stub
+[x] DMA descriptor probe harness (read-only)
+[ ] MCU ping/handshake test once firmware staging is approved
+
+Reporting & Audit
+[x] Maintain firmware inventory metadata
+[ ] Append hardware-probe results to operations log after runs
+[ ] Finalize sprint tasks and acceptance criteria once hardware info arrives
