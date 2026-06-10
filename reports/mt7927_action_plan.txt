@@ -1,0 +1,156 @@
+MT7927 Action Plan and Stepwise Roadmap
+======================================
+
+Top Level Summary
+-----------------
+The repository currently contains scaffolding only. To make MT7927 operational on Linux we must:
+1. Extract or obtain firmware blobs.
+2. Reverse engineer MMIO register map and DMA descriptor formats.
+3. Implement safe PCIe bring‑up and BAR mapping.
+4. Implement firmware loader and MCU handshake.
+5. Implement DMA rings, TX/RX paths, and mac80211 integration.
+6. Add power management, debug hooks, and build integration.
+7. Validate on hardware with a prioritized test matrix.
+
+Critical Path (order to unblock iterative testing)
+--------------------------------------------------
+1. Acquire hardware access and ensure safe test bench.
+2. Obtain firmware blobs or legal extraction path.
+3. Map BARs and confirm MMIO regions (read‑only probes).
+4. Extract basic register reads to identify chip ID and status registers.
+5. Implement minimal PCI probe, BAR mapping, DMA mask, and IRQ handling.
+6. Implement firmware loader stub and verify MCU responds.
+7. Implement minimal TX/RX loopback via DMA rings and mac80211 stub.
+8. Iterate on register map and DMA descriptor fields.
+9. Expand mac80211 features and regulatory handling.
+
+Detailed Tasks and Plans
+------------------------
+
+A. Hardware and Test Bench
+- Tasks:
+  - Secure a test machine with MT7927 hardware or a validated PCIe passthrough VM with the device.
+  - Prepare power cycling, JTAG/SWD access if available, and a serial console for MCU logs.
+  - Create a snapshot/backup procedure for firmware and register experiments.
+- Acceptance:
+  - Device enumerates in lspci and is stable under repeated resets.
+
+B. Firmware Acquisition and Mapping
+- Tasks:
+  - Locate firmware filenames from modinfo and firmware_files.txt.
+  - Extract firmware from Windows driver packages (pnputil/pnputil export) or vendor packages; document legal constraints.
+  - Identify which blobs are ROM patches vs RAM code by comparing file headers and kernel load logs.
+  - Produce a firmware load order and handshake spec.
+- Acceptance:
+  - Firmware blobs identified and a non‑destructive loader can request MCU version.
+
+C. Register Map Extraction
+- Tasks:
+  - Identify BAR base addresses and sizes via lspci and pci_iomap.
+  - Run read‑only sweeps across BARs to find readable regions and stable values.
+  - Correlate firmware strings, modinfo aliases, and observed MMIO reads to hypothesize register functions.
+  - Produce a register map skeleton with offsets and hypothesized bitfields.
+- Data Collection:
+  - Scripts to dump BAR memory and log results with timestamps.
+- Acceptance:
+  - Chip ID register or stable signature found; register map skeleton created.
+
+D. DMA Descriptor and Ring Reverse Engineering
+- Tasks:
+  - Search memory regions for repeating patterns consistent with descriptors.
+  - Capture DMA buffer contents and correlate with observed TX/RX events.
+  - Hypothesize descriptor fields (addr, len, flags, next) and validate with controlled writes.
+  - Implement a ring initialization sequence and test with small packets.
+- Acceptance:
+  - Successful DMA transfer of a known payload and verified completion interrupt.
+
+E. PCIe Bring‑Up and IRQ Handling
+- Tasks:
+  - Implement robust pci_enable_device, dma mask setup, pci_request_regions, pci_iomap.
+  - Enable MSI if available; fallback to legacy interrupts.
+  - Implement safe devm_request_irq with a conservative interrupt handler that only logs.
+  - Add power management stubs for suspend/resume.
+- Acceptance:
+  - Device probe completes without kernel oops and IRQs can be observed.
+
+F. Firmware Loader and MCU Handshake
+- Tasks:
+  - Implement loader stub that writes firmware to device memory per firmware plan.
+  - Implement handshake: request MCU status, upload, verify checksum, start MCU.
+  - Add timeout and rollback logic.
+- Acceptance:
+  - MCU reports expected version or responds to ping.
+
+G. mac80211 Integration and TX/RX Path
+- Tasks:
+  - Implement minimal ieee80211_hw ops and register netdev.
+  - Implement TX path to enqueue skb into DMA ring and RX path to deliver skb to mac80211.
+  - Implement basic rate control and station handling (use mac80211 default helpers).
+  - Add regulatory and channel configuration hooks.
+- Acceptance:
+  - Device can transmit and receive packets in a controlled test (loopback or AP/STA).
+
+H. Power Management and Stability
+- Tasks:
+  - Implement suspend/resume callbacks and PCIe ASPM handling.
+  - Implement clock gating and reset domain handling if applicable.
+- Acceptance:
+  - Device survives suspend/resume cycles and power state transitions.
+
+I. Debugging, Logging, and Tests
+- Tasks:
+  - Add debugfs entries for register dumps and firmware status.
+  - Add dynamic tracing hooks and rate‑limited logging.
+  - Create automated tests for enumeration, firmware load, DMA transfer, and basic throughput.
+- Acceptance:
+  - Tests pass on hardware and logs provide reproducible traces.
+
+J. Build Integration and CI
+- Tasks:
+  - Add Kconfig and Makefile entries consistent with mt76 style.
+  - Add module parameters for debug and test modes.
+  - Add documentation in reports/ and README for bring‑up steps.
+- Acceptance:
+  - Module builds cleanly and CI checks (compileall) pass.
+
+Blocked Items and Reverse Engineering Needs
+------------------------------------------
+- Exact register addresses and bitfields (requires MMIO probing and firmware correlation).
+- DMA descriptor format (requires memory inspection and controlled experiments).
+- MCU firmware handshake protocol (requires firmware analysis).
+- Some power/reset sequences (may require vendor docs or hardware probing).
+
+Safe to Stub Initially
+----------------------
+- Full mac80211 feature set (start with minimal ops).  
+- Advanced rate control and offload features.  
+- Full power management (start with basic suspend/resume).  
+- Debugfs and tracing can be added incrementally.
+
+Estimated Effort and Roles
+--------------------------
+- Hardware setup and safe probing scripts: 8–16 hours (hardware engineer).  
+- Firmware extraction and mapping: 16–40 hours (firmware analyst).  
+- Register map extraction and probing: 40–120 hours (reverse engineer).  
+- DMA ring reverse engineering and implementation: 40–120 hours (driver engineer).  
+- mac80211 integration and testing: 40–80 hours (wireless driver engineer).  
+- Power management and stability: 16–40 hours (driver engineer).  
+- Tests and CI integration: 8–24 hours (QA/CI engineer).
+
+Minimal First Sprint (2 weeks)
+------------------------------
+1. Secure hardware and create safe test bench (Day 1–2).  
+2. Acquire firmware blobs and document legal constraints (Day 2–4).  
+3. Implement safe PCI probe and BAR mapping with read‑only sweeps (Day 3–7).  
+4. Identify chip signature and produce initial register map skeleton (Day 5–10).  
+5. Implement firmware loader stub and verify MCU ping (Day 8–12).  
+6. Implement minimal DMA ring and a TX test harness (Day 10–14).
+
+Notes and Safety
+----------------
+- Never write to unknown control bits without a rollback plan.  
+- Keep full backups of firmware and device state where possible.  
+- Respect firmware licensing and distribution restrictions.  
+- Log everything with timestamps and correlate with firmware versions.
+
+End of file
