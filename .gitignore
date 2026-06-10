@@ -56,3 +56,6 @@ data/raw/*/*
 
 # Keep the structure but not the actual driver binaries
 # Users should collect drivers themselves following instructions
+
+# Known-devices auto-update metadata (local state)
+data/known_devices/.known_devices_update_metadata.json

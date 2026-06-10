@@ -9,12 +9,14 @@
     "chipset": "ax210",
     "source_url": null,
     "collection_date": "2026-02-11",
-    "notes": "SYNTHETIC - Placeholder data created by scaffolding script."
+    "notes": "SYNTHETIC - Placeholder data created by scaffolding script.",
+    "known_device_source": "local",
+    "known_device_chipset": "ax210"
   },
   "windows_nav_card": {
     "driver_download_url": null,
     "support_page_url": null,
-    "inf_file_path": null
+    "inf_file_path": "Netwtw10.inf"
   },
   "driver_components": {
     "modules": [],
@@ -26,6 +28,12 @@
       "name": "PLACEHOLDER_REG",
       "description": "Placeholder register for scaffolding",
       "access": "rw"
+    },
+    {
+      "address": "0x0020",
+      "name": "CSR_INT",
+      "description": "Interrupt status register",
+      "access": "rw"
     }
   ],
   "functions": [
@@ -33,35 +41,50 @@
       "name": "placeholder_function",
       "signature": "void placeholder_function(void)",
       "purpose": "Placeholder function for scaffolding"
+    },
+    {
+      "name": "iwl_pcie_probe",
+      "signature": "int iwl_pcie_probe(struct pci_dev *pdev, const struct pci_device_id *ent)",
+      "purpose": "Probe and initialize Intel WiFi device"
     }
   ],
+  "device": {
+    "hardware_id_hash": "5d6793b8c9c9bb64044944571acc04d56afec43b4a2d34f081295f06ce80cd9c",
+    "manufacturer": "Intel Corporation"
+  },
   "driver": {
     "files": [
       {
         "name": "Netwtw10.sys",
-        "type": "sys",
-        "size_bytes": 8388608,
-        "hash_sha256": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-        "version": "22.240.0.7",
-        "product_name": "Intel(R) Wireless WiFi Link Driver",
-        "file_description": "Intel(R) Wireless WiFi Link Driver"
+        "type": "driver",
+        "size_bytes": 4194304,
+        "version": "22.210.0.2"
       },
       {
         "name": "Netwtw10.inf",
         "type": "inf",
-        "size_bytes": 245760
-      },
-      {
-        "name": "Netwtw10.cat",
-        "type": "cat",
-        "size_bytes": 12345
+        "size_bytes": 102400
       }
     ],
-    "version": "22.240.0.7",
+    "version": "22.210.0.2",
     "provider": "Intel Corporation",
-    "date": "2024-06-15"
+    "date": "2023-10-15"
   },
-  "device": {
-    "manufacturer": "Intel"
+  "firmware": {
+    "known_blobs": [
+      "iwlwifi-ty-a0-gf-a0.pnvm",
+      "iwlwifi-ty-a0-gf-a0.ucode"
+    ]
+  },
+  "known_device_validation": {
+    "known_device_matched": true,
+    "hardware_hash_match": false,
+    "driver_version_match": false,
+    "missing_fields": [],
+    "warnings": [
+      "Hardware ID hash mismatch: expected 9ff34b3087da657af8ca575cfb2e9648f0bff92bfbbdd16725e3b2a8a25616ad, found 5d6793b8c9c9bb64044944571acc04d56afec43b4a2d34f081295f06ce80cd9c",
+      "Driver version mismatch: expected 22.210.0.2, found 0.0.0.SYNTHETIC"
+    ],
+    "info": []
   }
 }
