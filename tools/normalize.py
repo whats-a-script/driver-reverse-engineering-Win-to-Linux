@@ -44,6 +44,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from AstraForge.modules import chipset_detector
 import normalize_windows as norm_win
+import normalize_linux as norm_linux
 
 
 def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
@@ -72,24 +73,32 @@ def normalize_windows(device_id: str, chipset: str, raw_data_path) -> dict:
     return canonical
 
 
-def normalize_linux(device_id: str, chipset: str) -> dict:
+def normalize_linux(device_id: str, chipset: str, raw_data_path) -> dict:
     """
     Normalize Linux driver data to canonical JSON format.
     
-    TODO: Implement:
+    Phase 1B Implementation:
+    - Extract driver metadata from modinfo.txt
+    - Populate canonical['driver']['files'], version, provider
+    - Capture firmware references for Phase 2
+    
+    TODO for future phases:
     - C source file parsing (.c, .h)
     - AST analysis for function signatures
     - Register map extraction from #define statements
     - Device ID parsing from MODULE_DEVICE_TABLE
     - Kconfig parsing for driver options
     """
-    print(f"[TODO] Linux normalization for {device_id}")
-    print("  - Parse C source files with AST")
-    print("  - Extract function signatures")
-    print("  - Parse #define statements for registers")
-    print("  - Extract MODULE_DEVICE_TABLE entries")
+    print(f"Normalizing Linux driver for {device_id}")
+    print(f"  Reading from: {raw_data_path}")
     
-    return create_placeholder_canonical(device_id, "linux", chipset)
+    # Create base canonical structure
+    canonical = create_placeholder_canonical(device_id, "linux", chipset)
+    
+    # Phase 1B: Extract driver data from modinfo.txt
+    canonical = norm_linux.populate_linux_driver_data(canonical, raw_data_path)
+    
+    return canonical
 
 
 def create_placeholder_canonical(device_id: str, platform: str, chipset: str) -> dict:
@@ -184,7 +193,7 @@ def main():
     if platform == "windows":
         canonical_data = normalize_windows(device_id, detected_chipset, raw_data_path)
     else:
-        canonical_data = normalize_linux(device_id, detected_chipset)
+        canonical_data = normalize_linux(device_id, detected_chipset, raw_data_path)
     
     # Create output directory if needed
     canonical_path.mkdir(parents=True, exist_ok=True)
